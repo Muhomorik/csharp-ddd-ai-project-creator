@@ -407,6 +407,77 @@ This onboarding guide consolidates information from:
 
 ---
 
+## 🎨 Common XAML UI Patterns
+
+### Replacing TextBlock Content with Status Display
+
+**Scenario:** Replace a TextBlock with a status display showing "READY" and current date/time.
+
+**Requirements:**
+- Large green "READY" text
+- Current date/time displayed below
+- No code-behind
+- No data binding
+- Static XAML only
+
+**Implementation:**
+
+Replace the existing TextBlock with a StackPanel containing two TextBlocks:
+
+```xaml
+<StackPanel Margin="16" VerticalAlignment="Center" HorizontalAlignment="Center">
+    <TextBlock Text="READY"
+               FontSize="72"
+               FontWeight="Bold"
+               Foreground="Green"
+               HorizontalAlignment="Center"/>
+    <TextBlock Text="2025-11-02 21:35"
+               FontSize="16"
+               HorizontalAlignment="Center"
+               Margin="0,10,0,0"/>
+</StackPanel>
+```
+
+**Key Points:**
+- **StackPanel** allows vertical stacking of elements
+- **First TextBlock:** "READY" text with large font (72pt), bold weight, green color
+- **Second TextBlock:** Date/time in system format (hardcoded as static text)
+- **Alignment:** Both centered horizontally, StackPanel centered in parent
+- **Spacing:** 10px top margin on date/time TextBlock for separation
+
+**Before:**
+```xaml
+<TextBlock Margin="16"
+           TextWrapping="Wrap"
+           FontSize="14">
+    Lorem ipsum dolor sit amet...
+</TextBlock>
+```
+
+**After:**
+```xaml
+<StackPanel Margin="16" VerticalAlignment="Center" HorizontalAlignment="Center">
+    <TextBlock Text="READY"
+               FontSize="72"
+               FontWeight="Bold"
+               Foreground="Green"
+               HorizontalAlignment="Center"/>
+    <TextBlock Text="2025-11-02 21:35"
+               FontSize="16"
+               HorizontalAlignment="Center"
+               Margin="0,10,0,0"/>
+</StackPanel>
+```
+
+**Validation:**
+- [ ] StackPanel replaces single TextBlock
+- [ ] "READY" text is large (72pt), bold, and green
+- [ ] Date/time text is smaller (16pt) and positioned below
+- [ ] No code-behind modifications required
+- [ ] No data binding used (static text only)
+
+---
+
 ## 🔄 Continuous Validation
 
 **During development, AI Agent must:**
