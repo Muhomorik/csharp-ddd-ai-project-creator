@@ -409,6 +409,148 @@ This onboarding guide consolidates information from:
 
 ## 🎨 Common XAML UI Patterns
 
+### Converting Window to MetroWindow
+
+**Scenario:** Update a standard WPF Window to use MahApps.Metro's MetroWindow for modern styling.
+
+**Requirements:**
+- MahApps.Metro NuGet package installed (version 2.x as specified in Presentation Layer requirements)
+- DO NOT extend MetroWindow - use it directly as-is
+- Follow MahApps.Metro quick start guide: https://mahapps.com/docs/guides/quick-start
+
+**Implementation Steps:**
+
+#### Step 1: Update App.xaml Resource Dictionaries
+
+Add MahApps.Metro resource dictionaries to `App.xaml`. **All file names are Case Sensitive!**
+
+```xaml
+<Application x:Class="[MyProject.Presentation].App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:[MyProject.Presentation]"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- MahApps.Metro resource dictionaries. Make sure that all file names are Case Sensitive! -->
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
+                <!-- Theme setting -->
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Light.Blue.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
+```
+
+#### Step 2: Update MainWindow.xaml
+
+**Add MahApps.Metro namespace:**
+
+```xaml
+xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+```
+
+or
+
+```xaml
+xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+```
+
+**Replace Window tags with MetroWindow tags:**
+
+**Before:**
+```xaml
+<Window x:Class="[MyProject.Presentation].MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:[MyProject.Presentation]"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <!-- Your content -->
+    </Grid>
+</Window>
+```
+
+**After:**
+```xaml
+<mah:MetroWindow x:Class="[MyProject.Presentation].MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:[MyProject.Presentation]"
+        xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <!-- Your content -->
+    </Grid>
+</mah:MetroWindow>
+```
+
+#### Step 3: Update MainWindow.xaml.cs Code-Behind
+
+**Option 1 (Recommended):** Remove the base class (partial class will inherit from XAML):
+
+```csharp
+namespace [MyProject.Presentation]
+{
+    /// <summary>
+    /// Interaction logic for MainWindow.xaml
+    /// </summary>
+    public partial class MainWindow
+    {
+        public MainWindow()
+        {
+            InitializeComponent();
+        }
+    }
+}
+```
+
+**Option 2:** Explicitly inherit from MetroWindow:
+
+```csharp
+using MahApps.Metro.Controls;
+
+namespace [MyProject.Presentation]
+{
+    /// <summary>
+    /// Interaction logic for MainWindow.xaml
+    /// </summary>
+    public partial class MainWindow : MetroWindow
+    {
+        public MainWindow()
+        {
+            InitializeComponent();
+        }
+    }
+}
+```
+
+**Key Points:**
+- **DO NOT extend MetroWindow** - use it directly without creating derived classes
+- All MahApps.Metro resource file names are **Case Sensitive**
+- The MetroWindow provides modern window chrome, styled title bar, and Metro-themed appearance
+- Existing window content remains unchanged
+- MahApps.Metro package must be installed (already specified in Presentation Layer requirements)
+
+**Validation:**
+- [ ] App.xaml includes all three MahApps.Metro resource dictionaries
+- [ ] Resource dictionary file names are Case Sensitive
+- [ ] MainWindow.xaml uses `<mah:MetroWindow>` tags instead of `<Window>`
+- [ ] MahApps.Metro namespace is declared in XAML
+- [ ] Code-behind either removes base class or explicitly inherits from MetroWindow
+- [ ] Application builds without errors
+- [ ] Window displays with Metro styling when run
+
+---
+
 ### Replacing TextBlock Content with Status Display
 
 **Scenario:** Replace a TextBlock with a status display showing "READY" and current date/time.
