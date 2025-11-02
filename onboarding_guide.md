@@ -3,6 +3,55 @@
 
 ---
 
+## 📁 Required Configuration Files
+
+### .gitignore Configuration
+
+**REQUIRED:** Create a `.gitignore` file in the repository root.
+
+**Instructions:**
+1. Use the official .NET gitignore template from GitHub: https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
+2. Ensure the template covers:
+   - .NET build artifacts (bin/, obj/, *.dll, *.exe, *.pdb)
+   - Visual Studio files (.vs/, *.suo, *.user, *.sln.docstates)
+   - JetBrains products (ReSharper, Rider): .idea/, *.DotSettings.user, _ReSharper*/
+   - NuGet packages and artifacts
+   - Platform-specific files (Windows, macOS)
+
+**Alternative:** Use `dotnet new gitignore` command to generate a standard .NET gitignore file
+
+### .editorconfig Configuration
+
+**REQUIRED:** Create a `.editorconfig` file in the repository root to enforce consistent coding standards.
+
+**Instructions:**
+1. Use the official .NET EditorConfig template from Microsoft: https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/code-style-rule-options
+2. Alternatively, use `dotnet new editorconfig` command to generate a standard .NET EditorConfig file
+3. Ensure the configuration includes:
+   - **Core settings:** charset (utf-8), indent style (spaces), indent size (4 for C#, 2 for XML/JSON)
+   - **C# conventions:** var preferences, expression-bodied members, pattern matching
+   - **Formatting rules:** new line preferences, indentation, spacing, wrapping
+   - **Naming conventions:** PascalCase for types, interfaces with "I" prefix
+   - **.NET conventions:** using directives organization, this. qualifiers, type preferences
+4. Set `root = true` at the top of the file to prevent searching parent directories
+
+**Key Areas to Configure:**
+- File-specific settings for `*.cs`, `*.csproj`, `*.json`, `*.yml`, `*.md`
+- Code style rules with severity levels (warning, suggestion, silent)
+- Naming rules for interfaces, types, methods, properties
+- Formatting preferences for braces, spacing, and line breaks
+
+### Configuration Files Validation Checklist
+
+**AI Agent MUST confirm before code generation:**
+- [ ] `.gitignore` file exists in repository root
+- [ ] `.gitignore` includes .NET, Visual Studio, and JetBrains templates
+- [ ] `.editorconfig` file exists in repository root
+- [ ] `.editorconfig` enforces consistent C# coding standards
+- [ ] Both files are committed to version control
+
+---
+
 ## 📋 MUST READ: Solution & Project Structure Validation
 
 **REQUIRED BEFORE generating code:**
