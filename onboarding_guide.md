@@ -681,3 +681,232 @@ Replace the existing TextBlock with a StackPanel containing two TextBlocks:
 ---
 
 *This guide ensures systematic, validated solution recreation and maintains architectural integrity throughout the development process.*
+
+---
+
+## 🔌 WPF App Startup & Dependency Injection (Extended Guide)
+
+> Adapted from di_guide.md and aligned with this guide’s conventions (DDD layers, Autofac, .NET 9, and placeholder mapping).
+
+### 🧭 High-level Startup Flow (WPF)
+1. Initialize logging early (from configuration or defaults).
+2. Build the DI container and create an application-wide lifetime scope.
+3. Create the main window instance.
+4. Provide a window provider (or similar) with the main window reference before resolving any view model that needs it.
+5. Resolve the main/root view model from DI (constructor injection for its dependencies).
+6. Set DataContext and show the main window.
+7. On application exit, dispose the lifetime scope and container.
+
+### 🧪 Example App lifecycle (pseudo-C#)
+```csharp
+using Autofac;
+using System;
+using System.Linq;
+using System.Windows;
+
+public partial class App : Application
+{
+    private IContainer? _container;
+    private ILifetimeScope? _appScope;
+
+    protected override void OnStartup(StartupEventArgs e)
+    {
+        base.OnStartup(e);
+
+        // 1) Logging
+        InitializeLogging(); // e.g., load NLog/Serilog config
+
+        // 2) DI container
+        var builder = new ContainerBuilder();
+
+        // Option A: auto-discover modules from your solution assemblies (recommended in this guide)
+        var assemblies = AppDomain.CurrentDomain.GetAssemblies()
+            .Where(a => a.FullName?.StartsWith("[YourProjectNamespace]") == true)
+            .ToArray();
+        builder.RegisterAssemblyModules(assemblies);
+
+        // Option B: explicit registrations if you prefer
+        ConfigureServices(builder); // optional
+
+        _container = builder.Build();
+        _appScope = _container.BeginLifetimeScope();
+
+        // 3) Create main window instance
+        var mainWindow = new MainWindow();
+
+        // 4) Provide window reference before resolving VMs
+        var windowProvider = _appScope.Resolve<IWindowProvider>();
+        if (windowProvider is IWindowProviderWithSettableMainWindow settable)
+        {
+            settable.MainWindow = mainWindow;
+        }
+
+        // 5) Resolve main view model
+        var vm = _appScope.Resolve<IMainViewModel>();
+
+        // 6) Bind and show
+        mainWindow.DataContext = vm;
+        mainWindow.Show();
+    }
+
+    protected override void OnExit(ExitEventArgs e)
+    {
+        _appScope?.Dispose();
+        _container?.Dispose();
+        base.OnExit(e);
+    }
+}
+```
+
+Notes:
+- IWindowProviderWithSettableMainWindow is a generic placeholder; use any abstraction that allows setting and retrieving the main window reference without WPF coupling in lower layers.
+- IMainViewModel stands in for your actual root VM interface.
+
+### 🧩 Dependency registration recipe (Autofac)
+Below are container registrations you can adapt. Prefer explicit modules per layer as specified earlier (InfrastructureModule, ApplicationModule, PresentationModule), but these patterns apply inside those modules as well.
+
+#### 1) Logger injection (type-aware)
+Automatically inject a logger tied to the component’s concrete type so classes can depend on ILogger without manual wiring.
+```csharp
+// Autofac example: supply a logger tied to the component's type
+builder.RegisterCallback(cr =>
+{
+    cr.Registered += (sender, args) =>
+    {
+        args.ComponentRegistration.PipelineBuilding += (s, pb) =>
+        {
+            pb.Use(PipelinePhase.ParameterSelection, (ctx, next) =>
+            {
+                var implType = args.ComponentRegistration.Activator.LimitType;
+                var newParams = ctx.Parameters.Union(new[]
+                {
+                    new ResolvedParameter(
+                        (pi, c) => pi.ParameterType == typeof(ILogger),
+                        (pi, c) => /* e.g. NLog */ LogManager.GetLogger(implType.FullName))
+                });
+                ctx.ChangeParameters(newParams);
+                next(ctx);
+            });
+        };
+    };
+});
+```
+If you’re not using NLog, replace the GetLogger call with your logging library’s factory.
+
+#### 2) ViewModels
+- Register all classes ending with ViewModel as self (or interfaces), defaulting to transient (new instance per resolve).
+- Ensure any constructor parameter of type IScheduler (Rx) receives DispatcherScheduler.Current so UI subscriptions marshal correctly.
+```csharp
+builder.RegisterAssemblyTypes(ThisAssembly)
+    .Where(t => t.Name.EndsWith("ViewModel"))
+    .AsSelf() // optionally .AsImplementedInterfaces()
+    .WithParameter(new ResolvedParameter(
+        (pi, c) => pi.ParameterType == typeof(IScheduler),
+        (pi, c) => DispatcherScheduler.Current))
+    .InstancePerDependency();
+
+// Optional override for the root VM if it needs specific parameters
+builder.RegisterType<MainViewModel>()
+    .As<IMainViewModel>()
+    .WithParameter(new TypedParameter(typeof(IScheduler), DispatcherScheduler.Current))
+    .InstancePerDependency();
+```
+
+#### 3) Views and window provider
+- Register WPF windows and controls as self.
+- Provide a process-wide, single-instance window provider that holds references to important windows (set by App before resolving VMs).
+```csharp
+builder.RegisterType<MainWindow>().AsSelf();
+
+builder.RegisterType<WindowProvider>()
+    .As<IWindowProvider>()
+    .SingleInstance();
+
+public interface IWindowProvider { Window? MainWindow { get; } }
+public interface IWindowProviderWithSettableMainWindow : IWindowProvider { Window? MainWindow { get; set; } }
+```
+
+#### 4) Application/services layer
+- Register application services, domain services, repositories, and dispatchers.
+- Prefer singletons for stateless services and in-memory repositories that represent runtime state; otherwise choose lifetimes per your needs.
+```csharp
+// Services
+builder.RegisterType<ApplicationService>().As<IApplicationService>().SingleInstance();
+
+// Domain services
+builder.RegisterType<DomainService>().As<IDomainService>().SingleInstance();
+
+// Repositories (runtime/in-memory)
+builder.RegisterType<InMemoryRepository>().As<IRepository>().SingleInstance();
+
+// Event dispatcher / message bus abstractions
+builder.RegisterType<EventDispatcher>().As<IEventDispatcher>().SingleInstance();
+```
+
+#### 5) Utilities (imaging or other cross-cutting)
+Group them under abstractions and register as singletons if stateless:
+```csharp
+builder.RegisterType<ImageConverter>().As<IImageConverter>().SingleInstance();
+builder.RegisterType<ImageProcessingService>().As<IImageProcessingService>().SingleInstance();
+```
+
+#### 6) Reactive scheduling
+- Register a background IScheduler for timers/intervals and inject DispatcherScheduler.Current for UI-bound work.
+- Keep tests able to override schedulers.
+```csharp
+builder.RegisterInstance(TaskPoolScheduler.Default)
+    .As<IScheduler>(); // background default for non-UI work
+
+builder.RegisterType<PollingScheduler>()
+    .As<IPollingScheduler>()
+    .WithParameter(new TypedParameter(typeof(TimeSpan), TimeSpan.FromMilliseconds(50)))
+    .WithParameter(new TypedParameter(typeof(int), /* concurrency or batch size */ 4))
+    .SingleInstance();
+```
+
+#### 7) External process launcher or adapter
+Abstract OS/process interaction behind an interface and register a singleton instance.
+```csharp
+builder.Register(ctx => new ProcessLauncher(/* path or settings from config */))
+    .As<IProcessLauncher>()
+    .SingleInstance();
+```
+Load the external path or options from configuration rather than hardcoding. Keep the adapter UI-agnostic.
+
+#### 8) Final assembly scan (optional, safe defaults)
+Do a last pass to auto-register remaining types without overriding explicit registrations.
+```csharp
+builder.RegisterAssemblyTypes(ThisAssembly)
+    .AsSelf()
+    .AsImplementedInterfaces()
+    .PreserveExistingDefaults();
+```
+
+### 🧵 Threading and lifetime guidance
+- UI thread marshalling: inject DispatcherScheduler.Current into any view model or service that updates WPF-bound state via Rx.
+- Background work: inject a background IScheduler (e.g., TaskPoolScheduler.Default) for timers, intervals, or compute-bound observables.
+- Scopes: WPF apps commonly use a single root application scope; long-lived services can be singletons. Transients are fine for VMs and short-lived operations.
+- Disposal: ensure IDisposable services (including Rx subscriptions) are disposed on app exit. Prefer CompositeDisposable in VMs/services that subscribe to observables.
+
+### 📝 Logging conventions (generic)
+- Inject ILogger into every service/view model. Make it the first constructor parameter by convention.
+- When logging exceptions, log the exception object directly. Avoid eager string formatting when your logging library supports deferred formatting.
+- Resolve the logger from DI; do not create new logger instances manually inside methods.
+
+### ✅ Minimal checklist when recreating App
+- [ ] Logging initialized before any DI usage
+- [ ] DI container built; application lifetime scope created
+- [ ] Window provider registered as a singleton; MainWindow instance set before resolving VMs
+- [ ] View models get DispatcherScheduler.Current; background services use a background IScheduler
+- [ ] Services/repositories/utilities registered with appropriate lifetimes
+- [ ] Presentation decides application lifetime; lower layers do not terminate the process
+- [ ] Dispose the lifetime scope and container in OnExit
+
+### 📦 Drop-in templates (rename types to yours)
+- Root VM: IMainViewModel / MainViewModel
+- Window provider: IWindowProvider + implementation with MainWindow property
+- Background scheduler: IPollingScheduler (or similar) configured via TimeSpan + concurrency parameter
+- Process adapter: IProcessLauncher with start/stop async methods
+- Repositories/services: IRepository, IApplicationService, IDomainService
+
+---
