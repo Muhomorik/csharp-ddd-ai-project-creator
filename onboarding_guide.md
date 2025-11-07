@@ -1,70 +1,6 @@
 # 🤖 AI Agent OnBoarding & Execution Guide
+>
 > Comprehensive instructions for AI agents to validate, recreate, and work with Domain-Driven Design .NET 9 solutions using Autofac DI and layered architecture.
-
----
-
-## 📁 Required Configuration Files
-
-### .gitignore Configuration
-
-**REQUIRED:** Create a `.gitignore` file in the repository root.
-
-**Instructions:**
-1. Use the official .NET gitignore template from GitHub: https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
-2. Ensure the template covers:
-   - .NET build artifacts (bin/, obj/, *.dll, *.exe, *.pdb)
-   - Visual Studio files (.vs/, *.suo, *.user, *.sln.docstates)
-   - JetBrains products (ReSharper, Rider): .idea/, *.DotSettings.user, _ReSharper*/
-   - NuGet packages and artifacts
-   - Platform-specific files (Windows, macOS)
-
-**Alternative:** Use `dotnet new gitignore` command to generate a standard .NET gitignore file
-
-### .editorconfig Configuration
-
-**REQUIRED:** Create a `.editorconfig` file in the repository root to enforce consistent coding standards.
-
-**Instructions:**
-1. Use the official .NET EditorConfig template from Microsoft: https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/code-style-rule-options
-2. Alternatively, use `dotnet new editorconfig` command to generate a standard .NET EditorConfig file
-3. Ensure the configuration includes:
-   - **Core settings:** charset (utf-8), indent style (spaces), indent size (4 for C#, 2 for XML/JSON)
-   - **C# conventions:** var preferences, expression-bodied members, pattern matching
-   - **Formatting rules:** new line preferences, indentation, spacing, wrapping
-   - **Naming conventions:** PascalCase for types, interfaces with "I" prefix
-   - **.NET conventions:** using directives organization, this. qualifiers, type preferences
-4. Set `root = true` at the top of the file to prevent searching parent directories
-
-**Key Areas to Configure:**
-- File-specific settings for `*.cs`, `*.csproj`, `*.json`, `*.yml`, `*.md`
-- Code style rules with severity levels (warning, suggestion, silent)
-- Naming rules for interfaces, types, methods, properties
-- Formatting preferences for braces, spacing, and line breaks
-
-### Configuration Files Validation Checklist
-
-**AI Agent MUST confirm before code generation:**
-- [ ] `.gitignore` file exists in repository root
-- [ ] `.gitignore` includes .NET, Visual Studio, and JetBrains templates
-- [ ] `.editorconfig` file exists in repository root
-- [ ] `.editorconfig` enforces consistent C# coding standards
-- [ ] Both files are committed to version control
-
----
-
-## 📋 MUST READ: Solution & Project Structure Validation
-
-**REQUIRED BEFORE generating code:**
-- Confirm the solution file (`.sln`) exists in the repository root.
-- Confirm all four projects exist using the placeholder mapping:
-  - `[MyProject.Presentation]` → Main project (e.g., `MyfancyProject`)
-  - `[MyProject.Application]` → Application layer (e.g., `MyfancyProjectApplication`)
-  - `[MyProject.Infrastructure]` → Infrastructure layer (e.g., `MyfancyProjectInfrastructure`)
-  - `[MyProject.Domain]` → Domain layer (e.g., `MyfancyProjectDomain`)
-- If all four projects exist, **break execution** and output:  
-  _"Build stopped: All four projects exist in the solution."_
-- If the solution file is missing, **break execution** and output:  
-  _"Build stopped: Solution file is missing."_
 
 ---
 
@@ -79,6 +15,7 @@ In documentation and scripts, the following placeholders represent project layer
 
 **Example Mapping:**
 If your project name is `MyfancyProject`:
+
 - `[MyProject.Presentation]` → `MyfancyProject`
 - `[MyProject.Application]` → `MyfancyProjectApplication`
 - `[MyProject.Infrastructure]` → `MyfancyProjectInfrastructure`
@@ -86,32 +23,206 @@ If your project name is `MyfancyProject`:
 
 ---
 
+## 📋 MUST READ: Solution & Project Structure Validation
+
+**REQUIRED BEFORE generating code:**
+
+- Confirm the solution file (`.sln`) exists in the repository root.
+- Confirm all four projects exist using the placeholder mapping:
+  - `[MyProject.Presentation]` → Main project (e.g., `MyfancyProject`)
+  - `[MyProject.Application]` → Application layer (e.g., `MyfancyProjectApplication`)
+  - `[MyProject.Infrastructure]` → Infrastructure layer (e.g., `MyfancyProjectInfrastructure`)
+  - `[MyProject.Domain]` → Domain layer (e.g., `MyfancyProjectDomain`)
+- If all four projects exist, **break execution** and output:  
+  _"Build stopped: All four projects exist in the solution."_
+- If the solution file is missing, **break execution** and output:  
+  _"Build stopped: Solution file is missing."_
+
+---
+
 ## ⚠️ REQUIRED: Layered Architecture & Dependencies
 
 **Domain-Driven Design (DDD) Layering:**
+
 - Presentation → Application → Domain
 - Presentation → Infrastructure → Domain
 - Infrastructure → Domain
 
 **Validate:**
+
 - Each project only references allowed layers.
 - No UI types in Application/Domain.
 - Infrastructure implements Domain interfaces only.
 
 ---
 
+## 🎯 Layer-Specific Recreation Requirements
+
+### 1. 📱 Presentation Layer `[MyProject.Presentation]`
+
+**Project Type & Framework:**
+
+- **SDK:** `Microsoft.NET.Sdk`
+- **OutputType:** `WinExe` (Windows executable)
+- **TargetFramework:** `.NET 9.0-windows`
+- **WPF Enabled:** `<UseWPF>true</UseWPF>`
+- **Nullable Reference Types:** Enabled
+- **Implicit Usings:** Enabled
+- **Platforms:** `AnyCPU`, `x64`
+
+**Required NuGet Packages:**
+
+- `Autofac` (latest 8.x)
+- `Autofac.Extensions.DependencyInjection` (latest 10.x)
+- `DevExpressMvvm` (latest)
+- `MahApps.Metro` (latest 2.x)
+- `Microsoft.Extensions.Logging` (latest 8.x)
+- `Microsoft.Extensions.Logging.Abstractions` (latest 8.x)
+- `NLog` (latest 6.x)
+- `NLog.Extensions.Logging` (latest 6.x)
+- `System.Reactive` (latest 6.x)
+
+**Project References:**
+
+- Reference to `[MyProject.Application]`
+- Reference to `[MyProject.Infrastructure]`
+
+**Content & Resources:**
+
+- `NLog.config` (copied to output directory)
+- `Views\WindowPreview.xaml` (WPF XAML page)
+
+### 2. 🏢 Application Layer `[MyProject.Application]`
+
+**Project Setup:**
+
+- **TargetFramework:** `net9.0`
+- **SDK:** `Microsoft.NET.Sdk`
+- **ImplicitUsings:** `enable`
+- **Nullable:** `enable`
+- **Platforms:** `AnyCPU;x64`
+
+**Required NuGet Packages:**
+
+- `Autofac` (latest 8.x)
+- `Autofac.Extensions.DependencyInjection` (latest 10.x)
+- `NLog` (latest 6.x)
+- `NLog.Extensions.Logging` (latest 6.x)
+
+**Project References:**
+
+- Reference to `[MyProject.Domain]`
+
+### 3. 🔧 Infrastructure Layer `[MyProject.Infrastructure]`
+
+**Project Metadata:**
+
+- **SDK:** `Microsoft.NET.Sdk`
+- **TargetFramework:** `.NET 9.0` (`net9.0`)
+- **ImplicitUsings:** Enabled
+- **Nullable:** Enabled
+- **Platforms:** `AnyCPU` and `x64`
+
+**Required NuGet Packages:**
+
+- `Autofac` (latest 8.x)
+- `Autofac.Extensions.DependencyInjection` (latest 10.x)
+- `NLog` (latest 6.x)
+- `NLog.Extensions.Logging` (latest 6.x)
+- `System.Reactive` (latest 6.x)
+
+**Project References:**
+
+- Reference to `[MyProject.Domain]`
+
+### 4. 🎯 Domain Layer `[MyProject.Domain]`
+
+**Project Properties:**
+
+- **TargetFramework:** `net9.0`
+- **ImplicitUsings:** `enable`
+- **Nullable:** `enable`
+- **Platforms:** `AnyCPU;x64`
+
+**Folders:**
+
+- `Content` folder (included in project structure)
+
+**Dependencies:**
+
+- **NuGet Packages:** None (Domain layer should be dependency-free)
+- **Project References:** None (Domain layer has no dependencies)
+
+---
+
+## 📁 Required Configuration Files
+
+### .gitignore Configuration
+
+**REQUIRED:** Create a `.gitignore` file in the repository root.
+
+**Instructions:**
+
+1. Use the official .NET gitignore template from GitHub: <https://github.com/github/gitignore/blob/main/VisualStudio.gitignore>
+2. Ensure the template covers:
+   - .NET build artifacts (bin/, obj/, *.dll,*.exe, *.pdb)
+   - Visual Studio files (.vs/, *.suo,*.user, *.sln.docstates)
+   - JetBrains products (ReSharper, Rider): .idea/, _.DotSettings.user, _ReSharper_/
+   - NuGet packages and artifacts
+   - Platform-specific files (Windows, macOS)
+
+**Alternative:** Use `dotnet new gitignore` command to generate a standard .NET gitignore file
+
+### .editorconfig Configuration
+
+**REQUIRED:** Create a `.editorconfig` file in the repository root to enforce consistent coding standards.
+
+**Instructions:**
+
+1. Use the official .NET EditorConfig template from Microsoft: <https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/code-style-rule-options>
+2. Alternatively, use `dotnet new editorconfig` command to generate a standard .NET EditorConfig file
+3. Ensure the configuration includes:
+   - **Core settings:** charset (utf-8), indent style (spaces), indent size (4 for C#, 2 for XML/JSON)
+   - **C# conventions:** var preferences, expression-bodied members, pattern matching
+   - **Formatting rules:** new line preferences, indentation, spacing, wrapping
+   - **Naming conventions:** PascalCase for types, interfaces with "I" prefix
+   - **.NET conventions:** using directives organization, this. qualifiers, type preferences
+4. Set `root = true` at the top of the file to prevent searching parent directories
+
+**Key Areas to Configure:**
+
+- File-specific settings for `*.cs`, `*.csproj`, `*.json`, `*.yml`, `*.md`
+- Code style rules with severity levels (warning, suggestion, silent)
+- Naming rules for interfaces, types, methods, properties
+- Formatting preferences for braces, spacing, and line breaks
+
+### Configuration Files Validation Checklist
+
+**AI Agent MUST confirm before code generation:**
+
+- [ ] `.gitignore` file exists in repository root
+- [ ] `.gitignore` includes .NET, Visual Studio, and JetBrains templates
+- [ ] `.editorconfig` file exists in repository root
+- [ ] `.editorconfig` enforces consistent C# coding standards
+- [ ] Both files are committed to version control
+
+---
+
 ## 🔧 Autofac Module Configuration
 
 ### **Module per Project Pattern**
+
 Each project must have its own Autofac module with naming convention:
+
 - **Domain:** `[ProjectName]DomainModule` (optional - typically just entities)
-- **Infrastructure:** `[ProjectName]InfrastructureModule` 
+- **Infrastructure:** `[ProjectName]InfrastructureModule`
 - **Application:** `[ProjectName]ApplicationModule`
 - **Presentation:** `[ProjectName]PresentationModule`
 
 ### **Required Module Structure**
 
-#### Infrastructure Module Example:
+#### Infrastructure Module Example
+
 ```csharp
 // [MyProject.Infrastructure]/Modules/InfrastructureModule.cs
 using Autofac;
@@ -138,7 +249,8 @@ namespace [MyProject.Infrastructure].Modules
 }
 ```
 
-#### Application Module Example:
+#### Application Module Example
+
 ```csharp
 // [MyProject.Application]/Modules/ApplicationModule.cs
 using Autofac;
@@ -160,7 +272,8 @@ namespace [MyProject.Application].Modules
 }
 ```
 
-#### Presentation Module Example:
+#### Presentation Module Example
+
 ```csharp
 // [MyProject.Presentation]/Modules/PresentationModule.cs
 using Autofac;
@@ -190,7 +303,8 @@ namespace [MyProject.Presentation].Modules
 
 ### **Container Bootstrap (Presentation Layer)**
 
-#### App.xaml.cs or Program.cs:
+#### App.xaml.cs or Program.cs
+
 ```csharp
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
@@ -224,6 +338,7 @@ public partial class App : Application
 ### **Domain Interface → Infrastructure Implementation Pattern**
 
 **Domain Layer (Interface):**
+
 ```csharp
 // [MyProject.Domain]/Interfaces/IUserRepository.cs
 namespace [MyProject.Domain].Interfaces
@@ -237,6 +352,7 @@ namespace [MyProject.Domain].Interfaces
 ```
 
 **Infrastructure Layer (Implementation):**
+
 ```csharp
 // [MyProject.Infrastructure]/Repositories/UserRepository.cs
 using [MyProject.Domain].Interfaces;
@@ -261,6 +377,7 @@ namespace [MyProject.Infrastructure].Repositories
 **Registration happens automatically** in `InfrastructureModule` via assembly scanning.
 
 ### **Module Registration Validation**
+
 - [ ] Each layer has its own Module class
 - [ ] Modules use assembly scanning (no hardcoded types)
 - [ ] Presentation layer bootstraps container with assembly scanning
@@ -269,120 +386,39 @@ namespace [MyProject.Infrastructure].Repositories
 
 ---
 
-## 🎯 Layer-Specific Recreation Requirements
-
-### 1. 📱 Presentation Layer `[MyProject.Presentation]`
-
-**Project Type & Framework:**
-- **SDK:** `Microsoft.NET.Sdk`
-- **OutputType:** `WinExe` (Windows executable)
-- **TargetFramework:** `.NET 9.0-windows`
-- **WPF Enabled:** `<UseWPF>true</UseWPF>`
-- **Nullable Reference Types:** Enabled
-- **Implicit Usings:** Enabled
-- **Platforms:** `AnyCPU`, `x64`
-
-**Required NuGet Packages:**
-- `Autofac` (latest 8.x)
-- `Autofac.Extensions.DependencyInjection` (latest 10.x)
-- `DevExpressMvvm` (latest)
-- `MahApps.Metro` (latest 2.x)
-- `Microsoft.Extensions.Logging` (latest 8.x)
-- `Microsoft.Extensions.Logging.Abstractions` (latest 8.x)
-- `NLog` (latest 6.x)
-- `NLog.Extensions.Logging` (latest 6.x)
-- `System.Reactive` (latest 6.x)
-
-**Project References:**
-- Reference to `[MyProject.Application]`
-- Reference to `[MyProject.Infrastructure]`
-
-**Content & Resources:**
-- `NLog.config` (copied to output directory)
-- `Views\WindowPreview.xaml` (WPF XAML page)
-
-### 2. 🏢 Application Layer `[MyProject.Application]`
-
-**Project Setup:**
-- **TargetFramework:** `net9.0`
-- **SDK:** `Microsoft.NET.Sdk`
-- **ImplicitUsings:** `enable`
-- **Nullable:** `enable`
-- **Platforms:** `AnyCPU;x64`
-
-**Required NuGet Packages:**
-- `Autofac` (latest 8.x)
-- `Autofac.Extensions.DependencyInjection` (latest 10.x)
-- `NLog` (latest 6.x)
-- `NLog.Extensions.Logging` (latest 6.x)
-
-**Project References:**
-- Reference to `[MyProject.Domain]`
-
-### 3. 🔧 Infrastructure Layer `[MyProject.Infrastructure]`
-
-**Project Metadata:**
-- **SDK:** `Microsoft.NET.Sdk`
-- **TargetFramework:** `.NET 9.0` (`net9.0`)
-- **ImplicitUsings:** Enabled
-- **Nullable:** Enabled
-- **Platforms:** `AnyCPU` and `x64`
-
-**Required NuGet Packages:**
-- `Autofac` (latest 8.x)
-- `Autofac.Extensions.DependencyInjection` (latest 10.x)
-- `NLog` (latest 6.x)
-- `NLog.Extensions.Logging` (latest 6.x)
-- `System.Reactive` (latest 6.x)
-
-**Project References:**
-- Reference to `[MyProject.Domain]`
-
-### 4. 🎯 Domain Layer `[MyProject.Domain]`
-
-**Project Properties:**
-- **TargetFramework:** `net9.0`
-- **ImplicitUsings:** `enable`
-- **Nullable:** `enable`
-- **Platforms:** `AnyCPU;x64`
-
-**Folders:**
-- `Content` folder (included in project structure)
-
-**Dependencies:**
-- **NuGet Packages:** None (Domain layer should be dependency-free)
-- **Project References:** None (Domain layer has no dependencies)
-
----
-
 ## 📋 Complete Validation Checklist
 
 **AI Agent MUST confirm before code generation:**
 
-### Solution Structure:
+### Solution Structure
+
 - [ ] Solution file exists in repository root
 - [ ] All four expected projects present and named per conventions
 - [ ] Target framework is `net9.0` for all projects (except Presentation uses `net9.0-windows`)
 
-### Layer Dependencies:
+### Layer Dependencies
+
 - [ ] Presentation references Application and Infrastructure only
 - [ ] Application references Domain only
 - [ ] Infrastructure references Domain only
 - [ ] Domain has no project references
 
-### Project-Specific Validations:
+### Project-Specific Validations
+
 - [ ] **Presentation:** WPF enabled (not WinForms), all UI packages installed, contains NLog.config
 - [ ] **Application:** Autofac and NLog packages installed with correct versions
 - [ ] **Infrastructure:** All required packages including System.Reactive
 - [ ] **Domain:** No NuGet packages, contains Content folder
 
-### Code Quality:
+### Code Quality
+
 - [ ] All ViewModels inherit correct base class
 - [ ] DI and logging patterns match requirements
 - [ ] Nullable reference types enabled across all projects
 - [ ] ImplicitUsings enabled across all projects
 
-### Module Validation:
+### Module Validation
+
 - [ ] Each project has its own Autofac Module class
 - [ ] Modules use assembly scanning (no hardcoded assembly names)
 - [ ] Module naming follows convention: `[ProjectName][LayerName]Module`
@@ -394,6 +430,7 @@ namespace [MyProject.Infrastructure].Repositories
 ## ⚠️ Failure Patterns & Diagnostics
 
 **AI Agent MUST recognize and act on:**
+
 - Missing solution or project files: _"Build stopped: Solution file is missing."_
 - All four projects present: _"Build stopped: All four projects exist in the solution."_
 - WinForms presentation layer detected: _"Build stopped: Invalid presentation layer. Expected WPF (.NET 9-windows with UseWPF), found WinForms."_
@@ -408,24 +445,28 @@ namespace [MyProject.Infrastructure].Repositories
 ## 🚀 AI Agent Step-by-Step Execution
 
 ### Phase 1: Initial Validation
+
 1. **Check solution file existence**
 2. **Validate all four projects are present**
 3. **Confirm project naming conventions match placeholder mapping**
 4. **Verify target frameworks (.NET 9)**
 
 ### Phase 2: Dependency Validation
+
 1. **Check project reference hierarchy matches DDD rules**
 2. **Validate NuGet package installations and versions**
 3. **Confirm no circular dependencies exist**
 4. **Verify Domain layer isolation (no dependencies)**
 
 ### Phase 3: Structure Validation
+
 1. **Confirm WPF configuration for Presentation layer**
 2. **Validate Content folder exists in Domain**
 3. **Check NLog.config presence in Presentation**
 4. **Verify platform targets (AnyCPU, x64)**
 
 ### Phase 4: Code Generation Preparation
+
 1. **Load all validation results**
 2. **Apply DDD, DI, and logging patterns**
 3. **Use established templates and conventions**
@@ -433,19 +474,10 @@ namespace [MyProject.Infrastructure].Repositories
 
 ---
 
-## 📚 Reference Documentation Structure
-
-This onboarding guide consolidates information from:
-- **Project Mapping:** Placeholder conventions for generic documentation
-- **Layer Recreation Guides:** Specific requirements for each DDD layer
-- **Architecture Validation:** DDD principles and dependency rules
-- **Package Management:** Exact versions and configurations required
-
----
-
 ## 🎯 Success Criteria
 
 **Solution is ready for code generation when:**
+
 - All validation checklist items are confirmed ✅
 - Project structure matches DDD layered architecture ✅  
 - All dependencies are correctly installed and referenced ✅
@@ -456,20 +488,23 @@ This onboarding guide consolidates information from:
 
 ---
 
-## 🎨 Common XAML UI Patterns
+## 🎨 Implementation Guides
 
-### Converting Window to MetroWindow
+### Common XAML UI Patterns
+
+#### Converting Window to MetroWindow
 
 **Scenario:** Update a standard WPF Window to use MahApps.Metro's MetroWindow for modern styling.
 
 **Requirements:**
+
 - MahApps.Metro NuGet package installed (version 2.x as specified in Presentation Layer requirements)
 - DO NOT extend MetroWindow - use it directly as-is
-- Follow MahApps.Metro quick start guide: https://mahapps.com/docs/guides/quick-start
+- Follow MahApps.Metro quick start guide: <https://mahapps.com/docs/guides/quick-start>
 
 **Implementation Steps:**
 
-#### Step 1: Update App.xaml Resource Dictionaries
+##### Step 1: Update App.xaml Resource Dictionaries
 
 Add MahApps.Metro resource dictionaries to `App.xaml`. **All file names are Case Sensitive!**
 
@@ -493,7 +528,7 @@ Add MahApps.Metro resource dictionaries to `App.xaml`. **All file names are Case
 </Application>
 ```
 
-#### Step 2: Update MainWindow.xaml
+##### Step 2: Update MainWindow.xaml
 
 **Add MahApps.Metro namespace:**
 
@@ -510,6 +545,7 @@ xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
 **Replace Window tags with MetroWindow tags:**
 
 **Before:**
+
 ```xaml
 <Window x:Class="[MyProject.Presentation].MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -526,6 +562,7 @@ xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
 ```
 
 **After:**
+
 ```xaml
 <mah:MetroWindow x:Class="[MyProject.Presentation].MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -542,7 +579,7 @@ xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
 </mah:MetroWindow>
 ```
 
-#### Step 3: Update MainWindow.xaml.cs Code-Behind
+##### Step 3: Update MainWindow.xaml.cs Code-Behind
 
 **Option 1 (Recommended):** Remove the base class (partial class will inherit from XAML):
 
@@ -583,6 +620,7 @@ namespace [MyProject.Presentation]
 ```
 
 **Key Points:**
+
 - **DO NOT extend MetroWindow** - use it directly without creating derived classes
 - All MahApps.Metro resource file names are **Case Sensitive**
 - The MetroWindow provides modern window chrome, styled title bar, and Metro-themed appearance
@@ -590,6 +628,7 @@ namespace [MyProject.Presentation]
 - MahApps.Metro package must be installed (already specified in Presentation Layer requirements)
 
 **Validation:**
+
 - [ ] App.xaml includes all three MahApps.Metro resource dictionaries
 - [ ] Resource dictionary file names are Case Sensitive
 - [ ] MainWindow.xaml uses `<mah:MetroWindow>` tags instead of `<Window>`
@@ -600,11 +639,12 @@ namespace [MyProject.Presentation]
 
 ---
 
-### Replacing TextBlock Content with Status Display
+#### Replacing TextBlock Content with Status Display
 
 **Scenario:** Replace a TextBlock with a status display showing "READY" and current date/time.
 
 **Requirements:**
+
 - Large green "READY" text
 - Current date/time displayed below
 - No code-behind
@@ -630,6 +670,7 @@ Replace the existing TextBlock with a StackPanel containing two TextBlocks:
 ```
 
 **Key Points:**
+
 - **StackPanel** allows vertical stacking of elements
 - **First TextBlock:** "READY" text with large font (72pt), bold weight, green color
 - **Second TextBlock:** Date/time in system format (hardcoded as static text)
@@ -637,6 +678,7 @@ Replace the existing TextBlock with a StackPanel containing two TextBlocks:
 - **Spacing:** 10px top margin on date/time TextBlock for separation
 
 **Before:**
+
 ```xaml
 <TextBlock Margin="16"
            TextWrapping="Wrap"
@@ -646,6 +688,7 @@ Replace the existing TextBlock with a StackPanel containing two TextBlocks:
 ```
 
 **After:**
+
 ```xaml
 <StackPanel Margin="16" VerticalAlignment="Center" HorizontalAlignment="Center">
     <TextBlock Text="READY"
@@ -661,6 +704,7 @@ Replace the existing TextBlock with a StackPanel containing two TextBlocks:
 ```
 
 **Validation:**
+
 - [ ] StackPanel replaces single TextBlock
 - [ ] "READY" text is large (72pt), bold, and green
 - [ ] Date/time text is smaller (16pt) and positioned below
@@ -669,26 +713,12 @@ Replace the existing TextBlock with a StackPanel containing two TextBlocks:
 
 ---
 
-## 🔄 Continuous Validation
+### WPF App Startup & Dependency Injection (Extended Guide)
 
-**During development, AI Agent must:**
-- Re-validate structure before each significant change
-- Maintain DDD layer separation principles
-- Follow established naming conventions and patterns
-- Use placeholder mapping for documentation consistency
-- Apply logging and DI patterns consistently across layers
+> Adapted from di_guide.md and aligned with this guide's conventions (DDD layers, Autofac, .NET 9, and placeholder mapping).
 
----
+#### 🧭 High-level Startup Flow (WPF)
 
-*This guide ensures systematic, validated solution recreation and maintains architectural integrity throughout the development process.*
-
----
-
-## 🔌 WPF App Startup & Dependency Injection (Extended Guide)
-
-> Adapted from di_guide.md and aligned with this guide’s conventions (DDD layers, Autofac, .NET 9, and placeholder mapping).
-
-### 🧭 High-level Startup Flow (WPF)
 1. Initialize logging early (from configuration or defaults).
 2. Build the DI container and create an application-wide lifetime scope.
 3. Create the main window instance.
@@ -697,7 +727,8 @@ Replace the existing TextBlock with a StackPanel containing two TextBlocks:
 6. Set DataContext and show the main window.
 7. On application exit, dispose the lifetime scope and container.
 
-### 🧪 Example App lifecycle (pseudo-C#)
+#### 🧪 Example App lifecycle (pseudo-C#)
+
 ```csharp
 using Autofac;
 using System;
@@ -759,14 +790,18 @@ public partial class App : Application
 ```
 
 Notes:
+
 - IWindowProviderWithSettableMainWindow is a generic placeholder; use any abstraction that allows setting and retrieving the main window reference without WPF coupling in lower layers.
 - IMainViewModel stands in for your actual root VM interface.
 
-### 🧩 Dependency registration recipe (Autofac)
+#### 🧩 Dependency registration recipe (Autofac)
+
 Below are container registrations you can adapt. Prefer explicit modules per layer as specified earlier (InfrastructureModule, ApplicationModule, PresentationModule), but these patterns apply inside those modules as well.
 
-#### 1) Logger injection (type-aware)
-Automatically inject a logger tied to the component’s concrete type so classes can depend on ILogger without manual wiring.
+##### 1. Logger injection (type-aware)
+
+Automatically inject a logger tied to the component's concrete type so classes can depend on ILogger without manual wiring.
+
 ```csharp
 // Autofac example: supply a logger tied to the component's type
 builder.RegisterCallback(cr =>
@@ -791,11 +826,14 @@ builder.RegisterCallback(cr =>
     };
 });
 ```
-If you’re not using NLog, replace the GetLogger call with your logging library’s factory.
 
-#### 2) ViewModels
+If you're not using NLog, replace the GetLogger call with your logging library's factory.
+
+##### 2. ViewModels
+
 - Register all classes ending with ViewModel as self (or interfaces), defaulting to transient (new instance per resolve).
 - Ensure any constructor parameter of type IScheduler (Rx) receives DispatcherScheduler.Current so UI subscriptions marshal correctly.
+
 ```csharp
 builder.RegisterAssemblyTypes(ThisAssembly)
     .Where(t => t.Name.EndsWith("ViewModel"))
@@ -812,9 +850,11 @@ builder.RegisterType<MainViewModel>()
     .InstancePerDependency();
 ```
 
-#### 3) Views and window provider
+##### 3. Views and window provider
+
 - Register WPF windows and controls as self.
 - Provide a process-wide, single-instance window provider that holds references to important windows (set by App before resolving VMs).
+
 ```csharp
 builder.RegisterType<MainWindow>().AsSelf();
 
@@ -826,9 +866,11 @@ public interface IWindowProvider { Window? MainWindow { get; } }
 public interface IWindowProviderWithSettableMainWindow : IWindowProvider { Window? MainWindow { get; set; } }
 ```
 
-#### 4) Application/services layer
+##### 4. Application/services layer
+
 - Register application services, domain services, repositories, and dispatchers.
 - Prefer singletons for stateless services and in-memory repositories that represent runtime state; otherwise choose lifetimes per your needs.
+
 ```csharp
 // Services
 builder.RegisterType<ApplicationService>().As<IApplicationService>().SingleInstance();
@@ -843,16 +885,20 @@ builder.RegisterType<InMemoryRepository>().As<IRepository>().SingleInstance();
 builder.RegisterType<EventDispatcher>().As<IEventDispatcher>().SingleInstance();
 ```
 
-#### 5) Utilities (imaging or other cross-cutting)
+##### 5. Utilities (imaging or other cross-cutting)
+
 Group them under abstractions and register as singletons if stateless:
+
 ```csharp
 builder.RegisterType<ImageConverter>().As<IImageConverter>().SingleInstance();
 builder.RegisterType<ImageProcessingService>().As<IImageProcessingService>().SingleInstance();
 ```
 
-#### 6) Reactive scheduling
+##### 6. Reactive scheduling
+
 - Register a background IScheduler for timers/intervals and inject DispatcherScheduler.Current for UI-bound work.
 - Keep tests able to override schedulers.
+
 ```csharp
 builder.RegisterInstance(TaskPoolScheduler.Default)
     .As<IScheduler>(); // background default for non-UI work
@@ -864,17 +910,22 @@ builder.RegisterType<PollingScheduler>()
     .SingleInstance();
 ```
 
-#### 7) External process launcher or adapter
+##### 7. External process launcher or adapter
+
 Abstract OS/process interaction behind an interface and register a singleton instance.
+
 ```csharp
 builder.Register(ctx => new ProcessLauncher(/* path or settings from config */))
     .As<IProcessLauncher>()
     .SingleInstance();
 ```
+
 Load the external path or options from configuration rather than hardcoding. Keep the adapter UI-agnostic.
 
-#### 8) Final assembly scan (optional, safe defaults)
+##### 8. Final assembly scan (optional, safe defaults)
+
 Do a last pass to auto-register remaining types without overriding explicit registrations.
+
 ```csharp
 builder.RegisterAssemblyTypes(ThisAssembly)
     .AsSelf()
@@ -882,18 +933,21 @@ builder.RegisterAssemblyTypes(ThisAssembly)
     .PreserveExistingDefaults();
 ```
 
-### 🧵 Threading and lifetime guidance
+#### 🧵 Threading and lifetime guidance
+
 - UI thread marshalling: inject DispatcherScheduler.Current into any view model or service that updates WPF-bound state via Rx.
 - Background work: inject a background IScheduler (e.g., TaskPoolScheduler.Default) for timers, intervals, or compute-bound observables.
 - Scopes: WPF apps commonly use a single root application scope; long-lived services can be singletons. Transients are fine for VMs and short-lived operations.
 - Disposal: ensure IDisposable services (including Rx subscriptions) are disposed on app exit. Prefer CompositeDisposable in VMs/services that subscribe to observables.
 
-### 📝 Logging conventions (generic)
+#### 📝 Logging conventions (generic)
+
 - Inject ILogger into every service/view model. Make it the first constructor parameter by convention.
 - When logging exceptions, log the exception object directly. Avoid eager string formatting when your logging library supports deferred formatting.
 - Resolve the logger from DI; do not create new logger instances manually inside methods.
 
-### ✅ Minimal checklist when recreating App
+#### ✅ Minimal checklist when recreating App
+
 - [ ] Logging initialized before any DI usage
 - [ ] DI container built; application lifetime scope created
 - [ ] Window provider registered as a singleton; MainWindow instance set before resolving VMs
@@ -902,7 +956,8 @@ builder.RegisterAssemblyTypes(ThisAssembly)
 - [ ] Presentation decides application lifetime; lower layers do not terminate the process
 - [ ] Dispose the lifetime scope and container in OnExit
 
-### 📦 Drop-in templates (rename types to yours)
+#### 📦 Drop-in templates (rename types to yours)
+
 - Root VM: IMainViewModel / MainViewModel
 - Window provider: IWindowProvider + implementation with MainWindow property
 - Background scheduler: IPollingScheduler (or similar) configured via TimeSpan + concurrency parameter
@@ -911,19 +966,19 @@ builder.RegisterAssemblyTypes(ThisAssembly)
 
 ---
 
+### MVVM: ViewModel Loaded Command + WPF EventToCommand + Autofac DI
 
----
+> Create a new ViewModel, bind the Window's Loaded event to a ViewModel command (MVVM‑friendly), and register it with Autofac — aligned with this guide's conventions (DDD layers, placeholders, DI, logging, Rx schedulers, MahApps + DevExpress).
 
-## 🧩 MVVM: ViewModel Loaded Command + WPF EventToCommand + Autofac DI
-> Create a new ViewModel, bind the Window's Loaded event to a ViewModel command (MVVM‑friendly), and register it with Autofac — aligned with this guide’s conventions (DDD layers, placeholders, DI, logging, Rx schedulers, MahApps + DevExpress).
+#### 🎯 Goal
 
-### 🎯 Goal
 - Add a ViewModel that exposes a LoadedCommand
 - Wire WPF Window Loaded event to that command via DevExpress EventToCommand
 - Register the ViewModel in DI so it gets ILogger (first ctor param) and IScheduler for UI marshalling
 - Keep designer-friendly defaults via parameterless constructor
 
-### 1) 🧠 Create the ViewModel (DevExpress ViewModelBase)
+#### 1. 🧠 Create the ViewModel (DevExpress ViewModelBase)
+
 ```csharp
 using System;
 using System.Reactive.Concurrency;
@@ -991,12 +1046,14 @@ namespace [MyProject.Presentation].ViewModels
 ```
 
 Notes:
+
 - Keep ILogger as the first constructor parameter (matches logging/DI conventions in this guide)
 - Accept IScheduler to ObserveOn(_uiScheduler) for any UI-bound Rx flows
 - Implement IDisposable and use CompositeDisposable for subscriptions
 - Provide a parameterless constructor for design-time support
 
-### 2) 🪟 Add the ViewModel to the View (XAML)
+#### 2. 🪟 Add the ViewModel to the View (XAML)
+
 - Provide design-time DataContext so the designer can render bindings
 - Bind WPF Loaded event to the ViewModel's LoadedCommand using DevExpress EventToCommand
 
@@ -1029,11 +1086,13 @@ Notes:
 ```
 
 This mirrors patterns used elsewhere in this guide:
+
 - d:DataContext for design-time
 - dxmvvm:EventToCommand to forward Loaded to the ViewModel's LoadedCommand
 - MahApps MetroWindow usage as shown in the UI patterns section
 
-### 3) 🧩 Register the ViewModel in DI (Autofac, Presentation Module)
+#### 3. 🧩 Register the ViewModel in DI (Autofac, Presentation Module)
+
 Follow naming and module conventions from this guide. Inject DispatcherScheduler.Current for any IScheduler constructor parameter in ViewModels.
 
 ```csharp
@@ -1072,7 +1131,8 @@ namespace [MyProject.Presentation].Modules
 }
 ```
 
-### 4) 🚀 Startup wiring (resolve, set DataContext, show)
+#### 4. 🚀 Startup wiring (resolve, set DataContext, show)
+
 If you prefer the explicit pattern, here is a minimal example aligned with this guide's startup section.
 
 ```csharp
@@ -1099,7 +1159,8 @@ protected override void OnStartup(StartupEventArgs e)
 }
 ```
 
-### 5) ✅ Quick checklist
+#### 5. ✅ Quick checklist
+
 - [ ] ViewModel
   - [ ] ILogger is the first constructor parameter
   - [ ] Accept IScheduler and use it for UI-bound Rx (ObserveOn(_uiScheduler))
@@ -1115,3 +1176,30 @@ protected override void OnStartup(StartupEventArgs e)
   - [ ] Set window.DataContext = vm before window.Show()
 
 With these steps, you have a clean MVVM setup that matches this project's conventions: a ViewModel created and injected by DI, a View that binds to it, a Loaded event bridged to a command, and proper UI-thread scheduling for reactive flows.
+
+---
+
+## 🔄 Continuous Validation
+
+**During development, AI Agent must:**
+
+- Re-validate structure before each significant change
+- Maintain DDD layer separation principles
+- Follow established naming conventions and patterns
+- Use placeholder mapping for documentation consistency
+- Apply logging and DI patterns consistently across layers
+
+---
+
+## 📚 Reference Documentation Structure
+
+This onboarding guide consolidates information from:
+
+- **Project Mapping:** Placeholder conventions for generic documentation
+- **Layer Recreation Guides:** Specific requirements for each DDD layer
+- **Architecture Validation:** DDD principles and dependency rules
+- **Package Management:** Exact versions and configurations required
+
+---
+
+_This guide ensures systematic, validated solution recreation and maintains architectural integrity throughout the development process._
