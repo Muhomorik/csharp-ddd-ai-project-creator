@@ -910,3 +910,208 @@ builder.RegisterAssemblyTypes(ThisAssembly)
 - Repositories/services: IRepository, IApplicationService, IDomainService
 
 ---
+
+
+---
+
+## 🧩 MVVM: ViewModel Loaded Command + WPF EventToCommand + Autofac DI
+> Create a new ViewModel, bind the Window's Loaded event to a ViewModel command (MVVM‑friendly), and register it with Autofac — aligned with this guide’s conventions (DDD layers, placeholders, DI, logging, Rx schedulers, MahApps + DevExpress).
+
+### 🎯 Goal
+- Add a ViewModel that exposes a LoadedCommand
+- Wire WPF Window Loaded event to that command via DevExpress EventToCommand
+- Register the ViewModel in DI so it gets ILogger (first ctor param) and IScheduler for UI marshalling
+- Keep designer-friendly defaults via parameterless constructor
+
+### 1) 🧠 Create the ViewModel (DevExpress ViewModelBase)
+```csharp
+using System;
+using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
+using System.Windows.Input;
+using DevExpress.Mvvm;
+using NLog;
+
+namespace [MyProject.Presentation].ViewModels
+{
+    public sealed class MyFeatureViewModel : ViewModelBase, IDisposable
+    {
+        private readonly ILogger _logger;
+        private readonly IScheduler _uiScheduler;
+        private readonly CompositeDisposable _disposables = new();
+
+        private string _title = "My Feature";
+
+        // DI constructor (runtime)
+        public MyFeatureViewModel(
+            ILogger logger,
+            IScheduler uiScheduler
+            // add other service dependencies here, e.g., IMyService myService
+        )
+        {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _uiScheduler = uiScheduler ?? throw new ArgumentNullException(nameof(uiScheduler));
+
+            LoadedCommand = new DelegateCommand(OnLoaded);
+            // Initialize other commands here (AsyncCommand, DelegateCommand, etc.)
+        }
+
+        // Parameterless constructor (design-time support)
+        public MyFeatureViewModel()
+        {
+            _logger = LogManager.GetCurrentClassLogger();
+            _uiScheduler = DispatcherScheduler.Current; // safe default
+
+            LoadedCommand = new DelegateCommand(() => { /* no-op at design time */ });
+        }
+
+        public string Title
+        {
+            get => _title;
+            set => SetProperty(ref _title, value, nameof(Title));
+        }
+
+        public ICommand LoadedCommand { get; }
+
+        private void OnLoaded()
+        {
+            // Called when the View raises Loaded (via EventToCommand)
+            // Typical flow:
+            // - subscribe to streams on _uiScheduler
+            // - kick off initial loads
+            // - update properties that the View binds to
+        }
+
+        public void Dispose()
+        {
+            _disposables.Dispose();
+        }
+    }
+}
+```
+
+Notes:
+- Keep ILogger as the first constructor parameter (matches logging/DI conventions in this guide)
+- Accept IScheduler to ObserveOn(_uiScheduler) for any UI-bound Rx flows
+- Implement IDisposable and use CompositeDisposable for subscriptions
+- Provide a parameterless constructor for design-time support
+
+### 2) 🪟 Add the ViewModel to the View (XAML)
+- Provide design-time DataContext so the designer can render bindings
+- Bind WPF Loaded event to the ViewModel's LoadedCommand using DevExpress EventToCommand
+
+```xml
+<mah:MetroWindow x:Class="[MyProject.Presentation].Views.MyFeatureWindow"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                 xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+                 xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+                 xmlns:viewModels="clr-namespace:[MyProject.Presentation].ViewModels"
+                 mc:Ignorable="d"
+                 d:DataContext="{d:DesignInstance Type=viewModels:MyFeatureViewModel, IsDesignTimeCreatable=True}"
+                 Title="{Binding Title}"
+                 Width="800" Height="450">
+
+    <!-- Bind window Loaded event to VM command -->
+    <dxmvvm:Interaction.Behaviors>
+        <dxmvvm:EventToCommand EventName="Loaded" Command="{Binding LoadedCommand}" />
+    </dxmvvm:Interaction.Behaviors>
+
+    <!-- Your UI here -->
+    <Grid>
+        <TextBlock Text="Hello from MyFeature"
+                   VerticalAlignment="Center"
+                   HorizontalAlignment="Center"/>
+    </Grid>
+</mah:MetroWindow>
+```
+
+This mirrors patterns used elsewhere in this guide:
+- d:DataContext for design-time
+- dxmvvm:EventToCommand to forward Loaded to the ViewModel's LoadedCommand
+- MahApps MetroWindow usage as shown in the UI patterns section
+
+### 3) 🧩 Register the ViewModel in DI (Autofac, Presentation Module)
+Follow naming and module conventions from this guide. Inject DispatcherScheduler.Current for any IScheduler constructor parameter in ViewModels.
+
+```csharp
+// [MyProject.Presentation]/Modules/PresentationModule.cs
+using System.Reactive.Concurrency;
+using Autofac;
+
+namespace [MyProject.Presentation].Modules
+{
+    public class PresentationModule : Module
+    {
+        protected override void Load(ContainerBuilder builder)
+        {
+            // ViewModels: inject DispatcherScheduler.Current for IScheduler
+            builder.RegisterAssemblyTypes(typeof(PresentationModule).Assembly)
+                   .Where(t => t.Name.EndsWith("ViewModel"))
+                   .AsSelf()
+                   .WithParameter(new Autofac.Core.ResolvedParameter(
+                        (pi, ctx) => pi.ParameterType == typeof(IScheduler),
+                        (pi, ctx) => DispatcherScheduler.Current))
+                   .InstancePerDependency();
+
+            // Views (optional, if you resolve them via DI)
+            builder.RegisterAssemblyTypes(typeof(PresentationModule).Assembly)
+                   .Where(t => t.Name.EndsWith("View") || t.Name.EndsWith("Window"))
+                   .AsSelf()
+                   .InstancePerDependency();
+
+            // Optional: explicit override for a specific ViewModel if it needs special parameters
+            // builder.RegisterType<MyFeatureViewModel>()
+            //        .AsSelf()
+            //        .WithParameter(new TypedParameter(typeof(IScheduler), DispatcherScheduler.Current))
+            //        .InstancePerDependency();
+        }
+    }
+}
+```
+
+### 4) 🚀 Startup wiring (resolve, set DataContext, show)
+If you prefer the explicit pattern, here is a minimal example aligned with this guide's startup section.
+
+```csharp
+protected override void OnStartup(StartupEventArgs e)
+{
+    base.OnStartup(e);
+
+    var builder = new ContainerBuilder();
+    // Prefer: auto-discover modules from your solution assemblies, as shown earlier in this guide
+    var assemblies = AppDomain.CurrentDomain.GetAssemblies()
+        .Where(a => a.FullName?.StartsWith("[YourProjectNamespace]") == true)
+        .ToArray();
+    builder.RegisterAssemblyModules(assemblies);
+
+    var container = builder.Build();
+    var scope = container.BeginLifetimeScope();
+
+    // Create the window and ViewModel
+    var window = scope.Resolve<[MyProject.Presentation].Views.MyFeatureWindow>();
+    var vm = scope.Resolve<[MyProject.Presentation].ViewModels.MyFeatureViewModel>();
+
+    window.DataContext = vm;
+    window.Show();
+}
+```
+
+### 5) ✅ Quick checklist
+- [ ] ViewModel
+  - [ ] ILogger is the first constructor parameter
+  - [ ] Accept IScheduler and use it for UI-bound Rx (ObserveOn(_uiScheduler))
+  - [ ] Provide a parameterless constructor for designer support
+  - [ ] Implement IDisposable and manage subscriptions with CompositeDisposable
+- [ ] View (XAML)
+  - [ ] Add xmlns:dxmvvm and xmlns:viewModels
+  - [ ] Use d:DataContext for design-time bindings
+  - [ ] Add dxmvvm:EventToCommand for Loaded
+- [ ] DI / Startup
+  - [ ] Register ViewModels with DispatcherScheduler.Current for IScheduler
+  - [ ] Resolve the View and ViewModel from Autofac
+  - [ ] Set window.DataContext = vm before window.Show()
+
+With these steps, you have a clean MVVM setup that matches this project's conventions: a ViewModel created and injected by DI, a View that binds to it, a Loaded event bridged to a command, and proper UI-thread scheduling for reactive flows.
