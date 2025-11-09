@@ -215,6 +215,9 @@ If your project name is `MyfancyProject`:
 Each project must have its own Autofac module with naming convention:
 
 - **Domain:** `[ProjectName]DomainModule` (optional - typically just entities)
+  
+  ⚠️ **NOTE:** In most cases, DO NOT create a DomainModule. The Domain layer should remain dependency-free with no NuGet packages including Autofac. Only create a DomainModule if you have domain services that need registration, and even then, consider if those services might actually belong in the Application layer instead.
+
 - **Infrastructure:** `[ProjectName]InfrastructureModule`
 - **Application:** `[ProjectName]ApplicationModule`
 - **Presentation:** `[ProjectName]PresentationModule`
