@@ -72,15 +72,15 @@ If your project name is `MyfancyProject`:
 
 **Required NuGet Packages:**
 
-- `Autofac` (latest 8.x)
-- `Autofac.Extensions.DependencyInjection` (latest 10.x)
-- `DevExpressMvvm` (latest)
-- `MahApps.Metro` (latest 2.x)
-- `Microsoft.Extensions.Logging` (latest 8.x)
-- `Microsoft.Extensions.Logging.Abstractions` (latest 8.x)
-- `NLog` (latest 6.x)
-- `NLog.Extensions.Logging` (latest 6.x)
-- `System.Reactive` (latest 6.x)
+- `Autofac` (Version="8.*")
+- `Autofac.Extensions.DependencyInjection` (Version="10.*")
+- `DevExpressMvvm` (Version="*")
+- `MahApps.Metro` (Version="2.*")
+- `Microsoft.Extensions.Logging` (Version="8.*")
+- `Microsoft.Extensions.Logging.Abstractions` (Version="8.*")
+- `NLog` (Version="6.*")
+- `NLog.Extensions.Logging` (Version="6.*")
+- `System.Reactive` (Version="6.*")
 
 **Project References:**
 
@@ -104,10 +104,10 @@ If your project name is `MyfancyProject`:
 
 **Required NuGet Packages:**
 
-- `Autofac` (latest 8.x)
-- `Autofac.Extensions.DependencyInjection` (latest 10.x)
-- `NLog` (latest 6.x)
-- `NLog.Extensions.Logging` (latest 6.x)
+- `Autofac` (Version="8.*")
+- `Autofac.Extensions.DependencyInjection` (Version="10.*")
+- `NLog` (Version="6.*")
+- `NLog.Extensions.Logging` (Version="6.*")
 
 **Project References:**
 
@@ -125,11 +125,11 @@ If your project name is `MyfancyProject`:
 
 **Required NuGet Packages:**
 
-- `Autofac` (latest 8.x)
-- `Autofac.Extensions.DependencyInjection` (latest 10.x)
-- `NLog` (latest 6.x)
-- `NLog.Extensions.Logging` (latest 6.x)
-- `System.Reactive` (latest 6.x)
+- `Autofac` (Version="8.*")
+- `Autofac.Extensions.DependencyInjection` (Version="10.*")
+- `NLog` (Version="6.*")
+- `NLog.Extensions.Logging` (Version="6.*")
+- `System.Reactive` (Version="6.*")
 
 **Project References:**
 
@@ -152,6 +152,27 @@ If your project name is `MyfancyProject`:
 
 - **NuGet Packages:** None (Domain layer should be dependency-free)
 - **Project References:** None (Domain layer has no dependencies)
+
+---
+
+## 📦 NuGet Package Version Management
+
+### ⚠️ Use Version Ranges
+
+- Always use version ranges (e.g., `Version="8.*"`) for NuGet packages.
+- Never pin exact versions (e.g., `Version="8.0.1"`) unless required for compatibility.
+- Only use versions available on NuGet.org.
+
+**Examples:**
+
+- `8.*` → Latest 8.x version
+- `2.*` → Latest 2.x version
+- `*` → Latest version (use with caution)
+
+**Common Mistake:**
+
+- ❌ `DevExpressMvvm` with `Version="24.2.3"` (not on NuGet.org)
+- ✅ Use `Version="*"` to get the latest available version
 
 ---
 
@@ -412,6 +433,7 @@ namespace [MyProject.Infrastructure].Repositories
 - [ ] **Application:** Autofac and NLog packages installed with correct versions
 - [ ] **Infrastructure:** All required packages including System.Reactive
 - [ ] **Domain:** No NuGet packages, contains Content folder
+- [ ] **Package references use version ranges** (e.g., `8.*`) instead of pinned exact versions
 
 ### Code Quality
 
@@ -442,6 +464,7 @@ namespace [MyProject.Infrastructure].Repositories
 - Dependency rule violations: _"Domain layer cannot reference other projects"_
 - Missing required modules: _"Required Autofac module [ModuleName] not found in [LayerName]"_
 - Hardcoded assembly registration: _"Assembly scanning required, hardcoded assembly names detected"_
+- Package version not available on NuGet.org: _"AI Agent must use version ranges (e.g., `Version='8.*'`) instead of pinning exact versions. This allows NuGet to resolve the latest available version from NuGet.org automatically."_
 
 ---
 
@@ -457,7 +480,7 @@ namespace [MyProject.Infrastructure].Repositories
 ### Phase 2: Dependency Validation
 
 1. **Check project reference hierarchy matches DDD rules**
-2. **Validate NuGet package installations and versions**
+2. **Validate NuGet package installations using version ranges** (e.g., `Version="8.*"`) to automatically resolve the latest compatible version from NuGet.org
 3. **Confirm no circular dependencies exist**
 4. **Verify Domain layer isolation (no dependencies)**
 
