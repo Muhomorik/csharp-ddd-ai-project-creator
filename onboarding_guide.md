@@ -64,7 +64,7 @@ If your project name is `MyfancyProject`:
 
 - **SDK:** `Microsoft.NET.Sdk`
 - **OutputType:** `WinExe` (Windows executable)
-- **TargetFramework:** `.NET 9.0-windows`
+- **TargetFramework:** `net9.0-windows10.0.26100.0`
 - **WPF Enabled:** `<UseWPF>true</UseWPF>`
 - **Nullable Reference Types:** Enabled
 - **Implicit Usings:** Enabled
