@@ -28,15 +28,16 @@ If your project name is `MyfancyProject`:
 **REQUIRED BEFORE generating code:**
 
 - Confirm the solution file (`.sln`) exists in the repository root.
+  - **If missing:** Break execution and output: _"Build stopped: Solution file is missing. Create solution first."_
 - Confirm all four projects exist using the placeholder mapping:
   - `[MyProject.Presentation]` → Main project (e.g., `MyfancyProject`)
   - `[MyProject.Application]` → Application layer (e.g., `MyfancyProjectApplication`)
   - `[MyProject.Infrastructure]` → Infrastructure layer (e.g., `MyfancyProjectInfrastructure`)
   - `[MyProject.Domain]` → Domain layer (e.g., `MyfancyProjectDomain`)
-- If all four projects exist, **break execution** and output:  
-  _"Build stopped: All four projects exist in the solution."_
-- If the solution file is missing, **break execution** and output:  
-  _"Build stopped: Solution file is missing."_
+  - **If any project is missing:** Break execution and output: _"Build stopped: One or more required projects are missing. Create missing projects first."_
+- **If all four projects exist and solution file exists:** The structural prerequisites are met. Proceed to dependency validation, structure validation, and implementation phases.
+
+**Note:** The presence of all four projects is a **PREREQUISITE**, not a completion condition. After validating the project structure, the AI agent must proceed to implement the actual application functionality (ViewModels, Views, UI components, etc.).
 
 ---
 
@@ -498,11 +499,64 @@ namespace [MyProject.Infrastructure].Repositories
 3. **Use established templates and conventions**
 4. **Reference documentation for implementation details**
 
+### Phase 5: Presentation Layer Implementation
+
+**IMPORTANT:** After validating the project structure (Phases 1-4), the AI agent MUST proceed to implement the actual application functionality. The presence of all four projects is a prerequisite, NOT a completion condition.
+
+#### 5.1 Create ViewModels (if task requires UI functionality)
+
+- **Follow the "MVVM: ViewModel Loaded Command" guide** (see Implementation Guides section below)
+- Create `ViewModels/` folder in Presentation project
+- Implement ViewModels with:
+  - ILogger as first constructor parameter
+  - IScheduler parameter for UI thread marshalling
+  - IDisposable implementation with CompositeDisposable for subscriptions
+  - Parameterless constructor for design-time support
+  - Inherit from DevExpress.Mvvm.ViewModelBase
+
+#### 5.2 Update Views (per UI pattern requirements)
+
+- **Convert to MetroWindow** (if using MahApps.Metro):
+  - Update App.xaml with MahApps.Metro resource dictionaries (Controls.xaml, Fonts.xaml, Themes/Light.Blue.xaml)
+  - Replace `<Window>` with `<mah:MetroWindow>` in XAML files
+  - Add MahApps.Metro namespace declaration
+  - Update code-behind to inherit from MetroWindow or remove base class
+- **Add MVVM bindings and EventToCommand**:
+  - Add design-time DataContext (`d:DataContext`)
+  - Wire Loaded events using DevExpress EventToCommand
+  - Bind ViewModel properties to View elements
+- **Implement UI content** per task requirements:
+  - Add layouts (Grid, StackPanel, etc.)
+  - Add controls (TextBlock, Button, etc.)
+  - Apply styling and formatting
+
+#### 5.3 Wire up Autofac DI Integration
+
+- Verify ViewModels auto-register via assembly scanning in PresentationModule
+- Update App.xaml.cs OnStartup method:
+  - Build Autofac container with RegisterAssemblyModules
+  - Resolve MainWindow and ViewModel from container
+  - Set window.DataContext = viewModel
+  - Call window.Show()
+- Ensure container disposal in OnExit
+
+#### 5.4 Build and Test
+
+- Run `dotnet build` to verify compilation
+- Check build output for:
+  - Zero errors
+  - Zero warnings (or only acceptable warnings)
+  - No binding errors in WPF output
+- Verify UI renders correctly when application runs
+- Test ViewModel commands and data binding
+
+**Phase 5 is complete ONLY when the application is functionally complete with working UI, ViewModels, and MVVM bindings.**
+
 ---
 
 ## 🎯 Success Criteria
 
-**Solution is ready for code generation when:**
+**Structural Readiness (Phases 1-4):**
 
 - All validation checklist items are confirmed ✅
 - Project structure matches DDD layered architecture ✅  
@@ -510,7 +564,16 @@ namespace [MyProject.Infrastructure].Repositories
 - Platform and framework targets are consistent ✅
 - Failure patterns are identified and resolved ✅
 
-**AI Agent must not proceed with code generation until all success criteria are met.**
+**Functional Completeness (Phase 5 - REQUIRED):**
+
+- ViewModels created and registered in DI ✅
+- Views converted to MetroWindow (if applicable) ✅
+- MVVM bindings implemented and functional ✅
+- UI content implemented per task requirements ✅
+- Application builds successfully (0 errors) ✅
+- Application runs and displays UI correctly ✅
+
+**AI Agent must complete BOTH structural readiness AND functional completeness before reporting task completion. The task is NOT complete when only the project structure exists.**
 
 ---
 
