@@ -156,6 +156,163 @@ If your project name is `MyfancyProject`:
 
 ---
 
+## 🧪 Test Projects Configuration
+
+### Test Project Naming Convention
+
+Each layer project should have a corresponding test project following this naming pattern:
+
+- `[MyProject.Presentation]` → `[MyProject].Tests`
+- `[MyProject.Application]` → `[MyProject]Application.Tests`
+- `[MyProject.Infrastructure]` → `[MyProject]Infrastructure.Tests`
+- `[MyProject.Domain]` → `[MyProject]Domain.Tests`
+
+**Example Mapping:**
+If your project name is `MyfancyProject`:
+
+- `MyfancyProject` → `MyfancyProject.Tests`
+- `MyfancyProjectApplication` → `MyfancyProjectApplication.Tests`
+- `MyfancyProjectInfrastructure` → `MyfancyProjectInfrastructure.Tests`
+- `MyfancyProjectDomain` → `MyfancyProjectDomain.Tests`
+
+### Required Test Project Properties
+
+**IMPORTANT:** Test projects must match the target framework of their tested project.
+
+#### Presentation Layer Test Project
+
+For `[MyProject].Tests` (testing the Presentation layer):
+
+```xml
+<PropertyGroup>
+  <TargetFramework>net9.0-windows10.0.26100.0</TargetFramework>
+  <ImplicitUsings>enable</ImplicitUsings>
+  <Nullable>enable</Nullable>
+  <IsPackable>false</IsPackable>
+  <IsTestProject>true</IsTestProject>
+  <Platforms>AnyCPU;x64</Platforms>
+</PropertyGroup>
+```
+
+#### Application/Infrastructure/Domain Layer Test Projects
+
+For `[MyProject]Application.Tests`, `[MyProject]Infrastructure.Tests`, `[MyProject]Domain.Tests`:
+
+```xml
+<PropertyGroup>
+  <TargetFramework>net9.0</TargetFramework>
+  <ImplicitUsings>enable</ImplicitUsings>
+  <Nullable>enable</Nullable>
+  <IsPackable>false</IsPackable>
+  <IsTestProject>true</IsTestProject>
+  <Platforms>AnyCPU;x64</Platforms>
+</PropertyGroup>
+```
+
+### Required NuGet Packages
+
+All test projects must have the following NuGet packages installed:
+
+- `AutoFixture` (Version="4.*")
+- `AutoFixture.AutoMoq` (Version="4.*")
+- `Microsoft.Bcl.TimeProvider` (Version="9.*")
+- `Microsoft.Extensions.TimeProvider.Testing` (Version="9.*")
+- `Microsoft.Reactive.Testing` (Version="6.*")
+- `Moq` (Version="4.*")
+- `NUnit` (Version="4.*")
+- `NUnit3TestAdapter` (Version="5.*")
+- `Microsoft.NET.Test.Sdk` (Version="17.*")
+- `NUnit.Analyzers` (Version="4.*")
+
+### Project References
+
+Each test project must reference its corresponding tested project:
+
+- `[MyProject].Tests` → references `[MyProject]` (Presentation)
+- `[MyProject]Application.Tests` → references `[MyProject]Application`
+- `[MyProject]Infrastructure.Tests` → references `[MyProject]Infrastructure`
+- `[MyProject]Domain.Tests` → references `[MyProject]Domain`
+
+**Example using dotnet CLI:**
+
+```bash
+dotnet add MyfancyProjectApplication.Tests reference MyfancyProjectApplication/MyfancyProjectApplication.csproj
+```
+
+### Initial Verification Test
+
+After creating each test project, add a simple verification test to ensure the test infrastructure is properly configured:
+
+```csharp
+using NUnit.Framework;
+
+namespace [ProjectName][LayerName].Tests
+{
+    [TestFixture]
+    public class InitialVerificationTests
+    {
+        [Test]
+        public void TestProjectSetup_ShouldPass()
+        {
+            Assert.Pass();
+        }
+    }
+}
+```
+
+**Example for `MyfancyProjectApplication.Tests`:**
+
+```csharp
+using NUnit.Framework;
+
+namespace MyfancyProjectApplication.Tests
+{
+    [TestFixture]
+    public class InitialVerificationTests
+    {
+        [Test]
+        public void TestProjectSetup_ShouldPass()
+        {
+            Assert.Pass();
+        }
+    }
+}
+```
+
+### Verification Command
+
+After creating all test projects and initial verification tests, run:
+
+```bash
+dotnet test
+```
+
+This command will:
+- Build all test projects
+- Discover all tests
+- Execute all tests
+- Report results
+
+**Expected output:** All verification tests should pass, confirming that test projects are properly configured.
+
+### Test Project Validation Checklist
+
+**AI Agent MUST confirm for each test project:**
+
+- [ ] Test project exists for each main project
+- [ ] Test projects follow naming convention ending with `.Tests`
+- [ ] Test project target framework matches tested project:
+  - [ ] Presentation test uses `net9.0-windows10.0.26100.0`
+  - [ ] Application/Infrastructure/Domain tests use `net9.0`
+- [ ] `<IsTestProject>true</IsTestProject>` is set in all test project files
+- [ ] `<IsPackable>false</IsPackable>` is set in all test project files
+- [ ] All required NUnit packages installed with version ranges
+- [ ] Each test project references its corresponding tested project
+- [ ] Initial verification test created with `Assert.Pass()`
+- [ ] `dotnet test` runs successfully and all verification tests pass
+
+---
+
 ## 📦 NuGet Package Version Management
 
 ### ⚠️ Use Version Ranges
@@ -420,6 +577,8 @@ namespace [MyProject.Infrastructure].Repositories
 - [ ] Solution file exists in repository root
 - [ ] All four expected projects present and named per conventions
 - [ ] Target framework is `net9.0` for all projects (except Presentation uses `net9.0-windows`)
+- [ ] Test project exists for each main project (following `.Tests` naming convention)
+- [ ] Test project target frameworks match their tested projects
 
 ### Layer Dependencies
 
@@ -427,6 +586,7 @@ namespace [MyProject.Infrastructure].Repositories
 - [ ] Application references Domain only
 - [ ] Infrastructure references Domain only
 - [ ] Domain has no project references
+- [ ] Each test project references only its corresponding tested project
 
 ### Project-Specific Validations
 
@@ -435,6 +595,14 @@ namespace [MyProject.Infrastructure].Repositories
 - [ ] **Infrastructure:** All required packages including System.Reactive
 - [ ] **Domain:** No NuGet packages, contains Content folder
 - [ ] **Package references use version ranges** (e.g., `8.*`) instead of pinned exact versions
+
+### Test Project Validations
+
+- [ ] All test projects have `<IsTestProject>true</IsTestProject>` property set
+- [ ] All test projects have `<IsPackable>false</IsPackable>` property set
+- [ ] All required NUnit packages installed in test projects with version ranges
+- [ ] Each test project has initial verification test with `Assert.Pass()`
+- [ ] `dotnet test` runs successfully and all verification tests pass
 
 ### Code Quality
 
@@ -484,6 +652,14 @@ namespace [MyProject.Infrastructure].Repositories
 2. **Validate NuGet package installations using version ranges** (e.g., `Version="8.*"`) to automatically resolve the latest compatible version from NuGet.org
 3. **Confirm no circular dependencies exist**
 4. **Verify Domain layer isolation (no dependencies)**
+5. **Verify test project structure and configuration**
+   - Confirm test projects exist for each main project
+   - Validate target frameworks match tested projects
+   - Check test project references
+   - Verify NUnit packages are installed
+6. **Run `dotnet test` to validate test discovery and execution**
+   - Confirm all initial verification tests pass
+   - Verify test infrastructure is properly configured
 
 ### Phase 3: Structure Validation
 
