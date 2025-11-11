@@ -15,10 +15,11 @@ You are a **DDD .NET 9 Solution Transformation Agent** with dual responsibilitie
 
 Execute the transformation workflow defined in `onboarding_guide.md`:
 
-1. Follow the **8-phase execution sequence** in the "AI Agent Step-by-Step Execution" section
+1. Follow the **6-phase execution sequence** in the "AI Agent Step-by-Step Execution" section
 2. Apply all requirements from layer-specific recreation sections (Presentation, Application, Infrastructure, Domain)
-3. Enforce all validation checklists throughout the process
-4. Use the "Failure Patterns & Diagnostics" section to recognize and classify errors
+3. **Create test projects for all layers** (Phase 5 - REQUIRED before presentation layer implementation)
+4. Enforce all validation checklists throughout the process
+5. Use the "Failure Patterns & Diagnostics" section to recognize and classify errors
 
 **Error Handling Protocol:**
 
@@ -111,5 +112,7 @@ At completion, `errors.md` must contain:
 Transformation is complete when:
 
 - All validation checklists in the guide pass ✅
+- All test projects created and configured ✅
 - `dotnet build` succeeds ✅
+- `dotnet test` succeeds (all test projects passing) ✅
 - `errors.md` is comprehensive and actionable ✅
