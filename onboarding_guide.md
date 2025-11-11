@@ -675,11 +675,48 @@ namespace [MyProject.Infrastructure].Repositories
 3. **Use established templates and conventions**
 4. **Reference documentation for implementation details**
 
-### Phase 5: Presentation Layer Implementation
+### Phase 5: Create Test Projects
 
-**IMPORTANT:** After validating the project structure (Phases 1-4), the AI agent MUST proceed to implement the actual application functionality. The presence of all four projects is a prerequisite, NOT a completion condition.
+**IMPORTANT:** Test projects are REQUIRED for all layers. This phase must be completed before implementing presentation layer functionality.
 
-#### 5.1 Create ViewModels (if task requires UI functionality)
+#### 5.1 Create Test Project for Each Layer
+
+Create test projects following the naming convention:
+- `[MyProject]` → `[MyProject].Tests`
+- `[MyProject]Application` → `[MyProject]Application.Tests`
+- `[MyProject]Infrastructure` → `[MyProject]Infrastructure.Tests`
+- `[MyProject]Domain` → `[MyProject]Domain.Tests`
+
+#### 5.2 Configure Test Projects
+
+For each test project:
+- Set matching target framework (Presentation: `net9.0-windows10.0.26100.0`, others: `net9.0`)
+- Set `<IsTestProject>true</IsTestProject>`
+- Set `<IsPackable>false</IsPackable>`
+- Set `<Platforms>AnyCPU;x64</Platforms>`
+- Install all required NUnit packages with version ranges
+- Add project reference to corresponding tested project
+
+#### 5.3 Add Initial Verification Tests
+
+Create `InitialVerificationTests.cs` in each test project with a basic passing test using `Assert.Pass()`.
+
+#### 5.4 Verify Test Infrastructure
+
+Run `dotnet test` to confirm:
+- All test projects are discovered
+- All tests execute successfully
+- Test infrastructure is properly configured
+
+**Phase 5 is complete when all test projects are created, configured, and passing their initial verification tests.**
+
+---
+
+### Phase 6: Presentation Layer Implementation
+
+**IMPORTANT:** After validating the project structure and creating test projects (Phases 1-5), the AI agent MUST proceed to implement the actual application functionality. The presence of all projects (including tests) is a prerequisite, NOT a completion condition.
+
+#### 6.1 Create ViewModels (if task requires UI functionality)
 
 - **Follow the "MVVM: ViewModel Loaded Command" guide** (see Implementation Guides section below)
 - Create `ViewModels/` folder in Presentation project
@@ -690,7 +727,7 @@ namespace [MyProject.Infrastructure].Repositories
   - Parameterless constructor for design-time support
   - Inherit from DevExpress.Mvvm.ViewModelBase
 
-#### 5.2 Update Views (per UI pattern requirements)
+#### 6.2 Update Views (per UI pattern requirements)
 
 - **Convert to MetroWindow** (if using MahApps.Metro):
   - Update App.xaml with MahApps.Metro resource dictionaries (Controls.xaml, Fonts.xaml, Themes/Light.Blue.xaml)
@@ -706,7 +743,7 @@ namespace [MyProject.Infrastructure].Repositories
   - Add controls (TextBlock, Button, etc.)
   - Apply styling and formatting
 
-#### 5.3 Wire up Autofac DI Integration
+#### 6.3 Wire up Autofac DI Integration
 
 - Verify ViewModels auto-register via assembly scanning in PresentationModule
 - Update App.xaml.cs OnStartup method:
@@ -716,7 +753,7 @@ namespace [MyProject.Infrastructure].Repositories
   - Call window.Show()
 - Ensure container disposal in OnExit
 
-#### 5.4 Build and Test
+#### 6.4 Build and Test
 
 - Run `dotnet build` to verify compilation
 - Check build output for:
@@ -726,7 +763,7 @@ namespace [MyProject.Infrastructure].Repositories
 - Verify UI renders correctly when application runs
 - Test ViewModel commands and data binding
 
-**Phase 5 is complete ONLY when the application is functionally complete with working UI, ViewModels, and MVVM bindings.**
+**Phase 6 is complete ONLY when the application is functionally complete with working UI, ViewModels, and MVVM bindings.**
 
 ---
 
