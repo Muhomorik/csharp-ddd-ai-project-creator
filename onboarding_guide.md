@@ -642,44 +642,186 @@ namespace [MyProject.Infrastructure].Repositories
 ### Phase 1: Initial Validation
 
 1. **Check solution file existence**
-2. **Validate all four projects are present**
-3. **Confirm project naming conventions match placeholder mapping**
-4. **Verify target frameworks (.NET 9)**
+2. **Validate project naming conventions match placeholder mapping**
+3. **Verify target frameworks (.NET 9)**
+4. **Confirm WPF configuration for Presentation layer (if exists)**
 
-### Phase 2: Dependency Validation
+---
 
-1. **Check project reference hierarchy matches DDD rules**
-2. **Validate NuGet package installations using version ranges** (e.g., `Version="8.*"`) to automatically resolve the latest compatible version from NuGet.org
-3. **Confirm no circular dependencies exist**
-4. **Verify Domain layer isolation (no dependencies)**
-5. **Verify test project structure and configuration**
-   - Confirm test projects exist for each main project
-   - Validate target frameworks match tested projects
-   - Check test project references
-   - Verify NUnit packages are installed
-6. **Run `dotnet test` to validate test discovery and execution**
-   - Confirm all initial verification tests pass
-   - Verify test infrastructure is properly configured
+### Phase 2: Create the Domain Layer
 
-### Phase 3: Structure Validation
+**Purpose:** The Domain layer is the core of your application and should have no dependencies.
 
-1. **Confirm WPF configuration for Presentation layer**
-2. **Validate Content folder exists in Domain**
-3. **Check NLog.config presence in Presentation**
-4. **Verify platform targets (AnyCPU, x64)**
+**Steps:**
 
-### Phase 4: Code Generation Preparation
+1. Create a new **Class Library** project for the Domain layer (e.g., `MyProject.Domain`)
+2. Configure Domain layer properties:
+   - **TargetFramework:** `net9.0`
+   - **ImplicitUsings:** `enable`
+   - **Nullable:** `enable`
+   - **Platforms:** `AnyCPU;x64`
+3. Create `Content` folder in project structure
+4. Ensure the Domain layer has:
+   - **No project references**
+   - **No NuGet package dependencies** (Domain should be dependency-free)
+5. Add core domain entities, value objects, and interfaces as needed
 
-1. **Load all validation results**
-2. **Apply DDD, DI, and logging patterns**
-3. **Use established templates and conventions**
-4. **Reference documentation for implementation details**
+**Validation:** Build the solution to confirm the Domain layer compiles successfully.
 
-### Phase 5: Create Test Projects
+```bash
+dotnet build
+```
+
+**Expected:** Zero errors, Domain layer builds independently.
+
+---
+
+### Phase 3: Create the Application Layer
+
+**Purpose:** The Application layer contains the business logic and orchestrates the use of the Domain layer.
+
+**Steps:**
+
+1. Create a new **Class Library** project for the Application layer (e.g., `MyProject.Application`)
+2. Configure Application layer properties:
+   - **TargetFramework:** `net9.0`
+   - **SDK:** `Microsoft.NET.Sdk`
+   - **ImplicitUsings:** `enable`
+   - **Nullable:** `enable`
+   - **Platforms:** `AnyCPU;x64`
+3. Add a **project reference** to the Domain layer (`MyProject.Domain`)
+4. Install required NuGet packages:
+   - `Autofac` (Version="8.*")
+   - `Autofac.Extensions.DependencyInjection` (Version="10.*")
+   - `NLog` (Version="6.*")
+   - `NLog.Extensions.Logging` (Version="6.*")
+5. Create `Modules/ApplicationModule.cs` for Autofac DI registration
+6. Implement application services, command handlers, and other business logic as needed
+
+**Validation:** Build the solution to confirm the Application layer compiles successfully with the Domain reference.
+
+```bash
+dotnet build
+```
+
+**Expected:** Zero errors, Application layer successfully references Domain.
+
+---
+
+### Phase 4: Create the Infrastructure Layer
+
+**Purpose:** The Infrastructure layer provides implementations for interfaces defined in the Domain layer (e.g., repositories, external services).
+
+**Steps:**
+
+1. Create a new **Class Library** project for the Infrastructure layer (e.g., `MyProject.Infrastructure`)
+2. Configure Infrastructure layer properties:
+   - **SDK:** `Microsoft.NET.Sdk`
+   - **TargetFramework:** `net9.0`
+   - **ImplicitUsings:** `enable`
+   - **Nullable:** `enable`
+   - **Platforms:** `AnyCPU;x64`
+3. Add a **project reference** to the Domain layer (`MyProject.Domain`)
+4. Install required NuGet packages:
+   - `Autofac` (Version="8.*")
+   - `Autofac.Extensions.DependencyInjection` (Version="10.*")
+   - `NLog` (Version="6.*")
+   - `NLog.Extensions.Logging` (Version="6.*")
+   - `System.Reactive` (Version="6.*")
+5. Create `Modules/InfrastructureModule.cs` for Autofac DI registration
+6. Implement infrastructure-specific services (e.g., database repositories, external API integrations)
+
+**Validation:** Build the solution to confirm the Infrastructure layer compiles successfully with the Domain reference.
+
+```bash
+dotnet build
+```
+
+**Expected:** Zero errors, Infrastructure layer successfully references Domain.
+
+---
+
+### Phase 5: Update the Presentation Layer
+
+**Purpose:** The Presentation layer (WPF) is the entry point for the application and interacts with the user.
+
+**Steps:**
+
+1. Update existing Presentation layer or create new **WPF Application** project
+2. Configure Presentation layer properties:
+   - **SDK:** `Microsoft.NET.Sdk`
+   - **OutputType:** `WinExe`
+   - **TargetFramework:** `net9.0-windows10.0.26100.0`
+   - **WPF Enabled:** `<UseWPF>true</UseWPF>`
+   - **Nullable:** `enable`
+   - **ImplicitUsings:** `enable`
+   - **Platforms:** `AnyCPU;x64`
+3. Add **project references** to:
+   - The Application layer (`MyProject.Application`)
+   - The Infrastructure layer (`MyProject.Infrastructure`)
+   - **Note:** Do NOT reference the Domain layer directly
+4. Install required NuGet packages:
+   - `Autofac` (Version="8.*")
+   - `Autofac.Extensions.DependencyInjection` (Version="10.*")
+   - `DevExpressMvvm` (Version="*")
+   - `MahApps.Metro` (Version="2.*")
+   - `Microsoft.Extensions.Logging` (Version="8.*")
+   - `Microsoft.Extensions.Logging.Abstractions` (Version="8.*")
+   - `NLog` (Version="6.*")
+   - `NLog.Extensions.Logging` (Version="6.*")
+   - `System.Reactive` (Version="6.*")
+5. Create `Modules/PresentationModule.cs` for Autofac DI registration
+6. Use Dependency Injection (e.g., Autofac) to wire up dependencies between layers in `App.xaml.cs`
+7. Implement ViewModels, Views, and other UI components as needed
+
+**Validation:** Build the solution to confirm the Presentation layer compiles successfully with the Application and Infrastructure references.
+
+```bash
+dotnet build
+```
+
+**Expected:** Zero errors, all layers properly referenced and building.
+
+---
+
+### Dependency Validation Checklist
+
+After completing Phases 2-5, verify the dependency hierarchy:
+
+- **Presentation Layer:**
+  - ✅ References: Application, Infrastructure
+  - ❌ Does **not** reference the Domain layer directly
+- **Application Layer:**
+  - ✅ References: Domain
+  - ❌ Does **not** reference the Infrastructure or Presentation layers
+- **Infrastructure Layer:**
+  - ✅ References: Domain
+  - ❌ Does **not** reference the Application or Presentation layers
+- **Domain Layer:**
+  - ❌ No references to other layers
+
+---
+
+### Final Build Validation
+
+After adding all layers and references:
+
+1. Build the solution to ensure there are no errors:
+   ```bash
+   dotnet build
+   ```
+2. Confirm the solution builds successfully with zero errors
+3. Verify all project references follow DDD dependency rules
+
+**By following this order, you ensure that the solution remains buildable and adheres to DDD principles at each step.**
+
+---
+
+### Phase 6: Create Test Projects
 
 **IMPORTANT:** Test projects are REQUIRED for all layers. This phase must be completed before implementing presentation layer functionality.
 
-#### 5.1 Create Test Project for Each Layer
+#### 6.1 Create Test Project for Each Layer
 
 Create test projects following the naming convention:
 - `[MyProject]` → `[MyProject].Tests`
@@ -687,7 +829,7 @@ Create test projects following the naming convention:
 - `[MyProject]Infrastructure` → `[MyProject]Infrastructure.Tests`
 - `[MyProject]Domain` → `[MyProject]Domain.Tests`
 
-#### 5.2 Configure Test Projects
+#### 6.2 Configure Test Projects
 
 For each test project:
 - Set matching target framework (Presentation: `net9.0-windows10.0.26100.0`, others: `net9.0`)
@@ -697,26 +839,26 @@ For each test project:
 - Install all required NUnit packages with version ranges
 - Add project reference to corresponding tested project
 
-#### 5.3 Add Initial Verification Tests
+#### 6.3 Add Initial Verification Tests
 
 Create `InitialVerificationTests.cs` in each test project with a basic passing test using `Assert.Pass()`.
 
-#### 5.4 Verify Test Infrastructure
+#### 6.4 Verify Test Infrastructure
 
 Run `dotnet test` to confirm:
 - All test projects are discovered
 - All tests execute successfully
 - Test infrastructure is properly configured
 
-**Phase 5 is complete when all test projects are created, configured, and passing their initial verification tests.**
+**Phase 6 is complete when all test projects are created, configured, and passing their initial verification tests.**
 
 ---
 
-### Phase 6: Presentation Layer Implementation
+### Phase 7: Presentation Layer Implementation
 
 **IMPORTANT:** After validating the project structure and creating test projects (Phases 1-5), the AI agent MUST proceed to implement the actual application functionality. The presence of all projects (including tests) is a prerequisite, NOT a completion condition.
 
-#### 6.1 Create ViewModels (if task requires UI functionality)
+#### 7.1 Create ViewModels (if task requires UI functionality)
 
 - **Follow the "MVVM: ViewModel Loaded Command" guide** (see Implementation Guides section below)
 - Create `ViewModels/` folder in Presentation project
@@ -727,7 +869,7 @@ Run `dotnet test` to confirm:
   - Parameterless constructor for design-time support
   - Inherit from DevExpress.Mvvm.ViewModelBase
 
-#### 6.2 Update Views (per UI pattern requirements)
+#### 7.2 Update Views (per UI pattern requirements)
 
 - **Convert to MetroWindow** (if using MahApps.Metro):
   - Update App.xaml with MahApps.Metro resource dictionaries (Controls.xaml, Fonts.xaml, Themes/Light.Blue.xaml)
@@ -743,7 +885,7 @@ Run `dotnet test` to confirm:
   - Add controls (TextBlock, Button, etc.)
   - Apply styling and formatting
 
-#### 6.3 Wire up Autofac DI Integration
+#### 7.3 Wire up Autofac DI Integration
 
 - Verify ViewModels auto-register via assembly scanning in PresentationModule
 - Update App.xaml.cs OnStartup method:
@@ -753,7 +895,7 @@ Run `dotnet test` to confirm:
   - Call window.Show()
 - Ensure container disposal in OnExit
 
-#### 6.4 Build and Test
+#### 7.4 Build and Test
 
 - Run `dotnet build` to verify compilation
 - Check build output for:
@@ -763,7 +905,7 @@ Run `dotnet test` to confirm:
 - Verify UI renders correctly when application runs
 - Test ViewModel commands and data binding
 
-**Phase 6 is complete ONLY when the application is functionally complete with working UI, ViewModels, and MVVM bindings.**
+**Phase 7 is complete ONLY when the application is functionally complete with working UI, ViewModels, and MVVM bindings.**
 
 ---
 
