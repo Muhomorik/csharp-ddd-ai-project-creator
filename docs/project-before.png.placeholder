@@ -1,0 +1,33 @@
+# Placeholder Image: Project Structure Before Onboarding Guide
+
+This is a placeholder for a screenshot showing:
+
+## Visual Content Needed:
+- Empty or minimal .NET project structure
+- Single .sln file or starter project
+- Missing layers (Application, Infrastructure, Domain)
+- No test projects
+- No configuration files (.gitignore, .editorconfig)
+
+## Suggested Screenshot:
+Visual Studio Solution Explorer showing:
+```
+YourProject/
+├── YourProject.sln
+└── YourProject/
+    ├── App.xaml
+    ├── MainWindow.xaml
+    └── (minimal WPF files only)
+```
+
+## To Replace This Placeholder:
+1. Create a new .NET WPF project (before onboarding)
+2. Take a screenshot of Solution Explorer
+3. Save as: docs/project-before.png
+4. Delete this .placeholder file
+
+## Image Specifications:
+- Format: PNG
+- Recommended size: 800x600 or larger
+- Show: Solution Explorer with collapsed/expanded folders
+- Highlight: Missing components (red arrows/annotations optional)

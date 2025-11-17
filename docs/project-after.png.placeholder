@@ -1,0 +1,50 @@
+# Placeholder Image: Project Structure After Onboarding Guide
+
+This is a placeholder for a screenshot showing:
+
+## Visual Content Needed:
+- Complete DDD layered architecture
+- All four layers: Presentation, Application, Infrastructure, Domain
+- Test projects for each layer
+- Configuration files (.gitignore, .editorconfig)
+- Autofac modules in each layer
+- ViewModels folder in Presentation
+- Content folder in Domain
+
+## Suggested Screenshot:
+Visual Studio Solution Explorer showing:
+```
+YourProject/
+├── YourProject.sln
+├── .gitignore
+├── .editorconfig
+├── YourProject/ (Presentation)
+│   ├── Modules/
+│   ├── ViewModels/
+│   ├── App.xaml
+│   ├── MainWindow.xaml
+│   └── NLog.config
+├── YourProjectApplication/
+│   └── Modules/
+├── YourProjectInfrastructure/
+│   └── Modules/
+├── YourProjectDomain/
+│   └── Content/
+├── YourProject.Tests/
+├── YourProjectApplication.Tests/
+├── YourProjectInfrastructure.Tests/
+└── YourProjectDomain.Tests/
+```
+
+## To Replace This Placeholder:
+1. Run onboarding guide on a project (or use WpfAppExample)
+2. Take a screenshot of Solution Explorer showing all projects
+3. Save as: docs/project-after.png
+4. Delete this .placeholder file
+
+## Image Specifications:
+- Format: PNG
+- Recommended size: 800x600 or larger
+- Show: Solution Explorer with partially expanded folders
+- Highlight: All 4 layers + 4 test projects (green checkmarks/annotations optional)
+- Contrast: Compare visually with project-before.png

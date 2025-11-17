@@ -1,0 +1,73 @@
+# Placeholder Image: Project Dependency Diagram
+
+This is a placeholder for a diagram showing:
+
+## Visual Content Needed:
+- DDD layer dependency flow diagram
+- Four layers: Presentation, Application, Infrastructure, Domain
+- Arrows showing allowed dependencies
+- Clear indication that Domain has NO dependencies
+
+## Suggested Diagram Content:
+
+```
+┌─────────────────┐
+│  Presentation   │ (WPF, ViewModels, Views)
+│   Layer         │
+└────────┬────────┘
+         │
+         ├──────────────────┐
+         │                  │
+         ▼                  ▼
+┌─────────────────┐  ┌─────────────────┐
+│  Application    │  │ Infrastructure  │
+│    Layer        │  │     Layer       │
+└────────┬────────┘  └────────┬────────┘
+         │                    │
+         │                    │
+         └──────────┬─────────┘
+                    ▼
+            ┌─────────────────┐
+            │     Domain      │ ◄── NO DEPENDENCIES
+            │      Layer      │     (Pure business logic)
+            └─────────────────┘
+```
+
+## Key Annotations to Include:
+1. Presentation → Application (Uses application services)
+2. Presentation → Infrastructure (Direct access to implementations)
+3. Application → Domain (Uses domain entities and interfaces)
+4. Infrastructure → Domain (Implements domain interfaces)
+5. Domain → (nothing) - Dependency-free core
+
+## To Replace This Placeholder:
+1. Create diagram using:
+   - Draw.io / Diagrams.net
+   - Mermaid diagram
+   - PowerPoint/Visio
+   - Any diagramming tool
+2. Export as PNG
+3. Save as: docs/dependency-diagram.png
+4. Delete this .placeholder file
+
+## Image Specifications:
+- Format: PNG
+- Recommended size: 800x600
+- Style: Clean, professional
+- Colors: Different color per layer (suggested: blue for Presentation, green for Application, orange for Infrastructure, purple for Domain)
+- Arrows: Clear directional indicators
+- Labels: Show what each dependency represents
+- Legend: Optional - explain arrow meanings
+
+## Alternative ASCII Diagram (if no tool available):
+
+```
+Presentation Layer (WPF)
+    │
+    ├───> Application Layer ────┐
+    │                           │
+    └───> Infrastructure Layer ─┤
+                                │
+                                ▼
+                         Domain Layer
+                      (No Dependencies)
