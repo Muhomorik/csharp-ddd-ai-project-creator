@@ -1273,6 +1273,23 @@ builder.RegisterCallback(cr =>
 
 If you're not using NLog, replace the GetLogger call with your logging library's factory.
 
+**⚠️ Autofac 8 Compatibility Note:**
+
+The example above uses older Autofac API patterns (`PipelinePhase`, `ConfigurePipeline`) that are not available in Autofac 8. For Autofac 8 compatibility, use `WithParameter` with `ResolvedParameter` in your module registrations instead:
+
+```csharp
+// In PresentationModule.cs (or other modules)
+builder.RegisterAssemblyTypes(typeof(PresentationModule).Assembly)
+    .Where(t => t.Name.EndsWith("ViewModel"))
+    .AsSelf()
+    .WithParameter(new Autofac.Core.ResolvedParameter(
+        (pi, ctx) => pi.ParameterType == typeof(ILogger),
+        (pi, ctx) => LogManager.GetLogger(pi.Member.DeclaringType?.FullName ?? "Unknown")))
+    .InstancePerDependency();
+```
+
+This achieves the same type-aware logger injection using APIs available in Autofac 8.
+
 ##### 2. ViewModels
 
 - Register all classes ending with ViewModel as self (or interfaces), defaulting to transient (new instance per resolve).
@@ -1347,11 +1364,25 @@ builder.RegisterType<ImageProcessingService>().As<IImageProcessingService>().Sin
 builder.RegisterInstance(TaskPoolScheduler.Default)
     .As<IScheduler>(); // background default for non-UI work
 
-builder.RegisterType<PollingScheduler>()
-    .As<IPollingScheduler>()
-    .WithParameter(new TypedParameter(typeof(TimeSpan), TimeSpan.FromMilliseconds(50)))
-    .WithParameter(new TypedParameter(typeof(int), /* concurrency or batch size */ 4))
+// Register UI scheduler as named dependency for ViewModels
+builder.Register(c => DispatcherScheduler.Current)
+    .Named<IScheduler>("UIScheduler")
     .SingleInstance();
+```
+
+**Implementation in Modules:**
+
+When using named schedulers in your modules:
+
+```csharp
+// In PresentationModule.cs
+builder.RegisterAssemblyTypes(typeof(PresentationModule).Assembly)
+    .Where(t => t.Name.EndsWith("ViewModel"))
+    .AsSelf()
+    .WithParameter(new Autofac.Core.ResolvedParameter(
+        (pi, ctx) => pi.ParameterType == typeof(IScheduler),
+        (pi, ctx) => ctx.ResolveNamed<IScheduler>("UIScheduler")))
+    .InstancePerDependency();
 ```
 
 ##### 7. External process launcher or adapter
